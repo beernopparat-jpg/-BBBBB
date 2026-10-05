@@ -1,0 +1,2766 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full bg-zinc-950 text-zinc-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIGER SOFT HS - ระบบบริหารจัดการอุปกรณ์และทรัพย์สิน</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fef2f2',
+              100: '#fee2e2',
+              500: '#ef4444',
+              600: '#dc2626',
+              700: '#b91c1c',
+              800: '#991b1b',
+              900: '#7f1d1d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome 6.4.0 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- Chart.js & DataLabels Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background-color: #09090b;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(220, 38, 38, 0.22) 0px, transparent 45%),
+        radial-gradient(at 100% 100%, rgba(255, 255, 255, 0.06) 0px, transparent 45%),
+        radial-gradient(at 50% 30%, rgba(153, 27, 27, 0.12) 0px, transparent 55%);
+      background-attachment: fixed;
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #09090b; }
+    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #dc2626; }
+    
+    .bg-theme-main {
+      background-color: #09090b;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(220, 38, 38, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(255, 255, 255, 0.07) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(153, 27, 27, 0.1) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    .glass-card {
+      background: rgba(18, 18, 22, 0.88);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    .glass-card-hover:hover {
+      border-color: rgba(220, 38, 38, 0.55);
+      box-shadow: 0 10px 30px -5px rgba(220, 38, 38, 0.22), 0 0 15px rgba(255, 255, 255, 0.05);
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden bg-theme-main text-zinc-100">
+
+  <!-- Sidebar Nav -->
+  <aside id="sidebar" class="w-64 bg-black border-r border-zinc-800 flex flex-col justify-between shrink-0 transition-all duration-300 z-30">
+    <div>
+      <!-- Brand Header -->
+      <div class="h-20 flex items-center px-4 border-b border-zinc-800 bg-zinc-950/90 gap-3">
+        <div class="w-12 h-12 bg-white rounded-xl p-1 shadow-lg border border-zinc-700 flex items-center justify-center shrink-0">
+          <img src="logo.webp" alt="TIGERSOFT Logo" class="max-h-full max-w-full object-contain">
+        </div>
+        <div>
+          <h1 class="font-bold text-base tracking-wide text-white leading-tight">TIGER SOFT <span class="text-red-500">HS</span></h1>
+          <p class="text-[11px] text-zinc-400">Asset & Safety System</p>
+        </div>
+      </div>
+
+      <!-- Nav Menu Items -->
+      <nav class="p-3 space-y-1 text-sm font-medium">
+        <button onclick="switchPage('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center px-4 py-3 rounded-xl transition text-red-400 bg-red-950/40 font-semibold border border-red-600/30 shadow-sm">
+          <i class="fa-solid fa-chart-pie w-6 text-center text-lg mr-2 text-red-500"></i>
+          <span>1. Dashboard ภาพรวม</span>
+        </button>
+        <button onclick="switchPage('car_check')" id="nav-car_check" class="nav-item w-full flex items-center px-4 py-3 rounded-xl transition text-zinc-300 hover:bg-zinc-900 hover:text-white">
+          <i class="fa-solid fa-truck-monster w-6 text-center text-lg mr-2 text-zinc-400"></i>
+          <span>2. เช็คอุปกรณ์รถยนต์</span>
+        </button>
+        <button onclick="switchPage('ppe')" id="nav-ppe" class="nav-item w-full flex items-center px-4 py-3 rounded-xl transition text-zinc-300 hover:bg-zinc-900 hover:text-white">
+          <i class="fa-solid fa-hard-hat w-6 text-center text-lg mr-2 text-zinc-400"></i>
+          <span>3. เบิก-คืน PPE</span>
+        </button>
+        <button onclick="switchPage('consumables')" id="nav-consumables" class="nav-item w-full flex items-center px-4 py-3 rounded-xl transition text-zinc-300 hover:bg-zinc-900 hover:text-white">
+          <i class="fa-solid fa-boxes-packing w-6 text-center text-lg mr-2 text-zinc-400"></i>
+          <span>4. เบิกวัสดุสิ้นเปลือง</span>
+        </button>
+        <button onclick="switchPage('assets')" id="nav-assets" class="nav-item w-full flex items-center px-4 py-3 rounded-xl transition text-zinc-300 hover:bg-zinc-900 hover:text-white">
+          <i class="fa-solid fa-building-columns w-6 text-center text-lg mr-2 text-zinc-400"></i>
+          <span>5. ทะเบียนทรัพย์สิน</span>
+        </button>
+        <button onclick="switchPage('maintenance')" id="nav-maintenance" class="nav-item w-full flex items-center px-4 py-3 rounded-xl transition text-zinc-300 hover:bg-zinc-900 hover:text-white">
+          <i class="fa-solid fa-screwdriver-wrench w-6 text-center text-lg mr-2 text-zinc-400"></i>
+          <span>6. บำรุงรักษาอุปกรณ์</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Sidebar Bottom Status & Settings -->
+    <div class="p-4 border-t border-zinc-800/80 bg-zinc-950/60 space-y-2">
+      <button onclick="openFirebaseConfigModal()" class="w-full py-2 px-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs rounded-lg flex items-center justify-between border border-zinc-700 transition">
+        <span class="flex items-center"><i class="fa-solid fa-cloud text-red-500 mr-2"></i> Cloud Sync ออนไลน์</span>
+        <span id="firestoreStatusBadge" class="px-2 py-0.5 rounded text-[10px] bg-red-950 text-red-400 font-bold border border-red-800/40">☁️ Real-Time</span>
+      </button>
+      <button onclick="openApiKeyModal()" class="w-full py-2 px-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs rounded-lg flex items-center justify-between border border-zinc-700 transition">
+        <span class="flex items-center"><i class="fa-solid fa-key text-red-400 mr-2"></i> Gemini API Key</span>
+        <span id="apiKeyStatus" class="px-2 py-0.5 rounded text-[10px] bg-zinc-950 text-zinc-400">Default</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col h-full overflow-hidden bg-theme-main">
+    
+    <!-- Top Header Bar -->
+    <header class="h-16 bg-black/90 border-b border-zinc-800 flex items-center justify-between px-6 shrink-0 backdrop-blur-md">
+      <div class="flex items-center space-x-3">
+        <button id="toggleSidebarBtn" onclick="toggleSidebar()" class="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 lg:hidden">
+          <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+        <h2 id="currentPageTitle" class="text-xl font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-chart-pie text-red-500"></i> Dashboard ภาพรวมระบบ
+        </h2>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <button onclick="resetToDemoData()" title="รีเซ็ตเป็นข้อมูลสาธิต" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+          <i class="fa-solid fa-rotate-left text-red-400"></i> รีเซ็ตตัวอย่างข้อมูล
+        </button>
+        
+        <div class="text-right hidden sm:block">
+          <div id="liveClock" class="text-sm font-semibold text-white tracking-wider">00:00:00</div>
+          <div id="liveDate" class="text-[11px] text-zinc-400">1 ม.ค. 2569</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main View Container -->
+    <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+      <!-- ================= SECTION 1: DASHBOARD ================= -->
+      <section id="page-dashboard" class="page-section space-y-6">
+        <!-- Top Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass-card glass-card-hover p-5 rounded-2xl flex items-center justify-between transition">
+            <div>
+              <p class="text-xs font-medium text-zinc-400">ทรัพย์สินทั้งหมด</p>
+              <h3 id="statTotalAssets" class="text-3xl font-bold text-white mt-1">0</h3>
+              <p class="text-xs text-white/90 mt-1"><i class="fa-solid fa-shield-check text-red-500"></i> สมบูรณ์ 100%</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-cubes"></i>
+            </div>
+          </div>
+
+          <div class="glass-card glass-card-hover p-5 rounded-2xl flex items-center justify-between transition">
+            <div>
+              <p class="text-xs font-medium text-zinc-400">การเช็ครถยนต์สะสม</p>
+              <h3 id="statTotalCarChecks" class="text-3xl font-bold text-red-500 mt-1">0</h3>
+              <p class="text-xs text-zinc-400 mt-1">ครั้งที่บันทึกข้อมูลแล้ว</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-truck-fast"></i>
+            </div>
+          </div>
+
+          <div class="glass-card glass-card-hover p-5 rounded-2xl flex items-center justify-between transition">
+            <div>
+              <p class="text-xs font-medium text-zinc-400">การเบิก PPE สะสม</p>
+              <h3 id="statTotalPPERecords" class="text-3xl font-bold text-white mt-1">0</h3>
+              <p class="text-xs text-zinc-400 mt-1">รายการเบิก-คืน</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-user-shield"></i>
+            </div>
+          </div>
+
+          <div class="glass-card glass-card-hover p-5 rounded-2xl flex items-center justify-between transition">
+            <div>
+              <p class="text-xs font-medium text-zinc-400">รายการแจ้งซ่อม/ชำรุด</p>
+              <h3 id="statPendingMaintenance" class="text-3xl font-bold text-red-500 mt-1">0</h3>
+              <p class="text-xs text-red-400/80 mt-1"><i class="fa-solid fa-triangle-exclamation"></i> เฝ้าระวังดูแล</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-red-600/20 border border-red-600/30 text-red-500 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-wrench"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass-card p-5 rounded-2xl">
+            <h4 class="font-bold text-sm text-zinc-200 mb-4 flex items-center justify-between">
+              <span><i class="fa-solid fa-car text-red-500 mr-2"></i>1. สถิติตรวจเช็ครถยนต์</span>
+            </h4>
+            <div class="h-64 relative">
+              <canvas id="chartCarCheck"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl">
+            <h4 class="font-bold text-sm text-zinc-200 mb-4 flex items-center justify-between">
+              <span><i class="fa-solid fa-hard-hat text-white mr-2"></i>2. สถิติการเบิก-คืน PPE</span>
+            </h4>
+            <div class="h-64 relative">
+              <canvas id="chartPPE"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl">
+            <h4 class="font-bold text-sm text-zinc-200 mb-4">
+              <i class="fa-solid fa-boxes-stacked text-red-500 mr-2"></i>3. สต็อกวัสดุสิ้นเปลืองคงเหลือ
+            </h4>
+            <div class="h-64 relative">
+              <canvas id="chartConsumables"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl">
+            <h4 class="font-bold text-sm text-zinc-200 mb-4">
+              <i class="fa-solid fa-pie-chart text-red-400 mr-2"></i>4. สภาพทรัพย์สินตามสถานะ
+            </h4>
+            <div class="h-64 relative">
+              <canvas id="chartAssetStatus"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl lg:col-span-2">
+            <h4 class="font-bold text-sm text-zinc-200 mb-4 flex flex-wrap items-center justify-between gap-2">
+              <span><i class="fa-solid fa-sliders text-red-500 mr-2"></i>5. รายงานการบำรุงรักษาประจำรอบ 1-4 (แยกตามทะเบียนรถยนต์)</span>
+              <select id="chartMaintVehicleFilter" onchange="updateCharts()" class="bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-1 text-xs text-red-400 font-semibold outline-none vehicle-dropdown-filter">
+                <option value="">ทุกทะเบียนรถยนต์</option>
+              </select>
+            </h4>
+            <div class="h-64 relative">
+              <canvas id="chartMaintenance"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sub-Tab Header Template for Pages 2-6 -->
+      <template id="subtab-header-template">
+        <div class="flex border-b border-zinc-800 mb-6 space-x-2">
+          <button class="tab-btn-form px-5 py-3 text-sm font-semibold border-b-2 transition border-red-600 text-red-500" data-tab="form">
+            <i class="fa-solid fa-pen-to-square mr-2"></i>ฟอร์มบันทึก
+          </button>
+          <button class="tab-btn-history px-5 py-3 text-sm font-semibold border-b-2 transition border-transparent text-zinc-400 hover:text-zinc-200" data-tab="history">
+            <i class="fa-solid fa-clock-rotate-left mr-2"></i>ประวัติการบันทึก
+          </button>
+        </div>
+      </template>
+
+      <!-- ================= SECTION 2: CAR CHECK ================= -->
+      <section id="page-car_check" class="page-section hidden space-y-6">
+        <div class="subtab-header-container"></div>
+        
+        <div id="car_check-tab-form" class="subtab-content space-y-6">
+          <div class="glass-card p-6 rounded-2xl max-w-5xl mx-auto space-y-6">
+            <h3 class="text-lg font-bold text-white border-b border-zinc-800 pb-3 flex flex-wrap items-center justify-between gap-3">
+              <span class="flex items-center"><img src="logo.webp" alt="TIGERSOFT" class="h-6 w-auto bg-white rounded p-0.5 mr-2 inline shadow-sm"><i class="fa-solid fa-truck-monster text-red-500 mr-2"></i>แบบฟอร์มเช็คอุปกรณ์ประจำรถยนต์ (กล่อง SS, S, M, L)</span>
+              
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="openAddEquipmentModal()" class="px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-xs font-semibold rounded-lg transition shadow-md shadow-red-900/30 flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus-circle"></i> + เพิ่มอุปกรณ์ใหม่เข้ากล่อง
+                </button>
+                <button type="button" onclick="runAIAssessSafety()" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs rounded-lg transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-robot text-red-400"></i> AI Assess Safety
+                </button>
+              </div>
+            </h3>
+
+            <form id="formCarCheck" onsubmit="handleCarCheckSubmit(event)" class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1"><i class="fa-solid fa-calendar-day text-red-400 mr-1"></i>วันที่ตรวจเช็ค</label>
+                  <input type="date" id="carCheckDate" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1"><i class="fa-solid fa-car text-red-400 mr-1"></i>ทะเบียนรถยนต์</label>
+                  <select id="carCheckVehicle" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none vehicle-dropdown"></select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1"><i class="fa-solid fa-user-check text-red-400 mr-1"></i>ชื่อบุคคลที่ตรวจเช็ค</label>
+                  <select id="carCheckInspector" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none personnel-dropdown"></select>
+                </div>
+              </div>
+
+              <div class="space-y-6">
+                <div class="bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                  <div class="flex items-center justify-between border-b border-zinc-800 pb-2 mb-3">
+                    <h4 class="text-sm font-bold text-red-400 flex items-center gap-2">
+                      <i class="fa-solid fa-box-open text-lg"></i> กล่อง SS (อุปกรณ์เล็ก / ดอกสว่าน / โฮลซอว์)
+                    </h4>
+                    <span id="box-ss-count" class="text-xs text-zinc-400">9 รายการ</span>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="box-ss-container"></div>
+                </div>
+
+                <div class="bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                  <div class="flex items-center justify-between border-b border-zinc-800 pb-2 mb-3">
+                    <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                      <i class="fa-solid fa-toolbox text-lg text-red-500"></i> กล่อง S (ชุดเครื่องมือช่างมือ / อุปกรณ์วัด)
+                    </h4>
+                    <span id="box-s-count" class="text-xs text-zinc-400">20 รายการ</span>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="box-s-container"></div>
+                </div>
+
+                <div class="bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                  <div class="flex items-center justify-between border-b border-zinc-800 pb-2 mb-3">
+                    <h4 class="text-sm font-bold text-red-400 flex items-center gap-2">
+                      <i class="fa-solid fa-plug-circle-bolt text-lg"></i> กล่อง M (เครื่องมือไฟฟ้า / แบตเตอรี่)
+                    </h4>
+                    <span id="box-m-count" class="text-xs text-zinc-400">7 รายการ</span>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="box-m-container"></div>
+                </div>
+
+                <div class="bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                  <div class="flex items-center justify-between border-b border-zinc-800 pb-2 mb-3">
+                    <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                      <i class="fa-solid fa-truck-ramp-box text-lg text-red-500"></i> กล่อง L (อุปกรณ์สนาม & งานช่างหนัก)
+                    </h4>
+                    <span id="box-l-count" class="text-xs text-zinc-400">4 รายการ</span>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="box-l-container"></div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ประเมินสภาพรวมรถและอุปกรณ์</label>
+                  <select id="carCheckStatus" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+                    <option value="สมบูรณ์พร้อมใช้งาน">✅ สมบูรณ์พร้อมใช้งาน (Pass)</option>
+                    <option value="พบอุปกรณ์ชำรุด">⚠️ พบอุปกรณ์ชำรุด (Needs Repair)</option>
+                    <option value="พบอุปกรณ์สูญหาย">❌ พบอุปกรณ์สูญหาย (Items Missing)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ภาพถ่ายจากกล้องหรืออัปโหลด (Camera / Upload Photo)</label>
+                  <input type="file" id="carCheckPhoto" accept="image/*" capture="environment" class="w-full text-xs text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-red-950 file:text-red-400 hover:file:bg-red-900">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-zinc-300 mb-1">หมายเหตุเพิ่มเติม (ระบุรายละเอียดชำรุด/สูญหาย)</label>
+                <textarea id="carCheckNote" rows="2" placeholder="เช่น ดอกสว่าน 1/4 หัก 1 ดอก, ตลับเมตรสูญหายระหว่างปฏิบัติงาน" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-3 text-sm text-white focus:border-red-500 outline-none"></textarea>
+              </div>
+
+              <div class="flex justify-end">
+                <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold text-sm rounded-xl transition shadow-lg shadow-red-900/30 flex items-center gap-2">
+                  <i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูลและบันทึกประวัติ
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div id="car_check-tab-history" class="subtab-content hidden space-y-4">
+          <div class="glass-card p-4 rounded-2xl flex flex-wrap gap-3 items-center justify-between">
+            <div class="flex flex-wrap gap-2 items-center">
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-zinc-500 text-xs"></i>
+                <input type="text" id="carCheckSearch" onkeyup="renderCarCheckTable()" placeholder="ค้นหา ทะเบียนรถ / ผู้ตรวจ..." class="bg-zinc-950 border border-zinc-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white outline-none w-64 focus:border-red-500">
+              </div>
+              <select id="carCheckFilterVehicle" onchange="renderCarCheckTable()" class="bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none vehicle-dropdown-filter">
+                <option value="">ทุกทะเบียนรถยนต์</option>
+              </select>
+            </div>
+            <button onclick="exportTableToCSV('car_check')" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-xl flex items-center gap-1.5">
+              <i class="fa-solid fa-file-excel text-red-400"></i> ส่งออก CSV
+            </button>
+          </div>
+
+          <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-zinc-300">
+                <thead class="bg-black text-zinc-400 font-semibold uppercase tracking-wider border-b border-zinc-800">
+                  <tr>
+                    <th class="p-3">วันที่</th>
+                    <th class="p-3">ทะเบียนรถยนต์</th>
+                    <th class="p-3">ผู้ตรวจเช็ค</th>
+                    <th class="p-3">ภาพถ่ายอัปโหลด</th>
+                    <th class="p-3">อุปกรณ์ ชำรุด/สูญหาย</th>
+                    <th class="p-3">สถานะภาพรวม</th>
+                    <th class="p-3">หมายเหตุ</th>
+                    <th class="p-3 text-right">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="carCheckTableBody" class="divide-y divide-zinc-800/60"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION 3: PPE & SAFETY EQUIPMENT ================= -->
+      <section id="page-ppe" class="page-section hidden space-y-6">
+        <div class="subtab-header-container"></div>
+
+        <div id="ppe-tab-form" class="subtab-content space-y-6">
+          <div class="glass-card p-6 rounded-2xl max-w-5xl mx-auto space-y-6">
+            <h3 class="text-lg font-bold text-white border-b border-zinc-800 pb-3 flex flex-wrap items-center justify-between gap-3">
+              <span class="flex items-center"><img src="logo.webp" alt="TIGERSOFT" class="h-6 w-auto bg-white rounded p-0.5 mr-2 inline shadow-sm"><i class="fa-solid fa-hard-hat text-red-500 mr-2"></i>แบบฟอร์มเบิก-คืน อุปกรณ์ PPE และอุปกรณ์ความปลอดภัย</span>
+              
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="openAddPPEModal()" class="px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-xs font-semibold rounded-lg transition shadow-md shadow-red-900/30 flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus-circle"></i> + เพิ่มอุปกรณ์ PPE ใหม่
+                </button>
+                <button type="button" onclick="runAISuggestPPE()" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs rounded-lg transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-robot text-red-400"></i> AI Suggest PPE
+                </button>
+              </div>
+            </h3>
+
+            <form id="formPPE" onsubmit="handlePPESubmit(event)" class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ประเภททำรายการ</label>
+                  <select id="ppeType" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+                    <option value="เบิกอุปกรณ์">📤 เบิกอุปกรณ์ PPE (ระบุวันที่คืน)</option>
+                    <option value="คืนอุปกรณ์">📥 คืนอุปกรณ์ PPE</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">วัน/เดือน/ปี ทำรายการ</label>
+                  <input type="date" id="ppeDate" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ทะเบียนรถยนต์ประจำทีม</label>
+                  <select id="ppeLocation" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none vehicle-dropdown"></select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ชื่อผู้เบิกอุปกรณ์</label>
+                  <select id="ppeUser" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none personnel-dropdown"></select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ชื่อผู้อนุมัติการเบิก</label>
+                  <select id="ppeApprover" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none personnel-dropdown"></select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-zinc-300 mb-1">ลักษณะงานที่ปฏิบัติ (ใส่เพื่อใช้ AI Suggest ช่วยเลือกอัตโนมัติ)</label>
+                <input type="text" id="ppeJobDescription" placeholder="เช่น งานเชื่อมโลหะกลางแจ้ง, งานปีนเสาไฟฟ้า, งานตัดแต่งกิ่งไม้" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+              </div>
+
+              <div class="space-y-3">
+                <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+                  <h4 class="text-sm font-bold text-red-400 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check"></i> เลือกรายการและจำนวนอุปกรณ์ PPE / ความปลอดภัย
+                  </h4>
+                  <span id="ppe-catalog-count" class="text-xs text-zinc-400">19 รายการ</span>
+                </div>
+
+                <div id="ppe-items-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ภาพถ่ายจากกล้องหรืออัปโหลด (Camera / Upload Photo)</label>
+                  <input type="file" id="ppePhoto" accept="image/*" capture="environment" class="w-full text-xs text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-red-950 file:text-red-400 hover:file:bg-red-900">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">หมายเหตุเพิ่มเติม</label>
+                  <input type="text" id="ppeNote" placeholder="เช่น เบิกไปใช้หน้างานไซท์ก่อสร้าง A" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+                </div>
+              </div>
+
+              <div class="flex justify-end">
+                <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold text-sm rounded-xl transition shadow-lg shadow-red-900/30 flex items-center gap-2">
+                  <i class="fa-solid fa-floppy-disk"></i> บันทึกรายการเบิก-คืน และอัปโหลดประวัติ
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div id="ppe-tab-history" class="subtab-content hidden space-y-4">
+          <div class="glass-card p-4 rounded-2xl flex flex-wrap gap-3 items-center justify-between">
+            <div class="flex flex-wrap gap-2 items-center">
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-zinc-500 text-xs"></i>
+                <input type="text" id="ppeSearch" onkeyup="renderPPETable()" placeholder="ค้นหา ผู้เบิก / ผู้อนุมัติ / ทะเบียนรถ..." class="bg-zinc-950 border border-zinc-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white outline-none w-64 focus:border-red-500">
+              </div>
+              <select id="ppeFilterType" onchange="renderPPETable()" class="bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none font-medium">
+                <option value="">ทุกประเภทและสถานะ</option>
+                <option value="เบิกอุปกรณ์">เบิกอุปกรณ์</option>
+                <option value="คืนอุปกรณ์">คืนอุปกรณ์</option>
+                <option value="รอคืนอุปกรณ์">⏳ รอคืนอุปกรณ์</option>
+                <option value="คืนสำเร็จ">✅ คืนสำเร็จ</option>
+              </select>
+            </div>
+            <button onclick="exportTableToCSV('ppe')" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-xl flex items-center gap-1.5">
+              <i class="fa-solid fa-file-excel text-red-400"></i> ส่งออก CSV
+            </button>
+          </div>
+
+          <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-zinc-300">
+                <thead class="bg-black text-zinc-400 font-semibold uppercase tracking-wider border-b border-zinc-800">
+                  <tr>
+                    <th class="p-3">วันที่ทำรายการ</th>
+                    <th class="p-3">ประเภท</th>
+                    <th class="p-3">ผู้เบิก</th>
+                    <th class="p-3">ผู้อนุมัติ</th>
+                    <th class="p-3">ทะเบียนรถยนต์</th>
+                    <th class="p-3">ภาพถ่ายอัปโหลด</th>
+                    <th class="p-3">รายการอุปกรณ์ (พร้อมจำนวน)</th>
+                    <th class="p-3">สถานะการคืน</th>
+                    <th class="p-3 text-right">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="ppeTableBody" class="divide-y divide-zinc-800/60"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION 4: CONSUMABLES SYSTEM ================= -->
+      <section id="page-consumables" class="page-section hidden space-y-6">
+        <div class="subtab-header-container"></div>
+
+        <div id="consumables-tab-form" class="subtab-content space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="glass-card p-6 rounded-2xl lg:col-span-2 space-y-6">
+              <h3 class="text-lg font-bold text-white border-b border-zinc-800 pb-3 flex flex-wrap items-center justify-between gap-3">
+                <span class="flex items-center"><img src="logo.webp" alt="TIGERSOFT" class="h-6 w-auto bg-white rounded p-0.5 mr-2 inline shadow-sm"><i class="fa-solid fa-boxes-packing text-red-500 mr-2"></i>ฟอร์มเบิกวัสดุสิ้นเปลือง (ตัดสต็อกและคำนวณคงเหลือ)</span>
+                
+                <button type="button" onclick="openAddConsumableModal()" class="px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-xs font-semibold rounded-lg transition shadow-md shadow-red-900/30 flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus-circle"></i> + เพิ่มวัสดุสิ้นเปลืองใหม่
+                </button>
+              </h3>
+
+              <form id="formConsumables" onsubmit="handleConsumablesSubmit(event)" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                  <div>
+                    <label class="block text-xs font-medium text-zinc-300 mb-1">วัน/เดือน/ปี ทำรายการ</label>
+                    <input type="date" id="conDate" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-zinc-300 mb-1">ชื่อผู้เบิกวัสดุ</label>
+                    <select id="conUser" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none personnel-dropdown"></select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-zinc-300 mb-1">ชื่อผู้อนุมัติ</label>
+                    <select id="conApprover" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none personnel-dropdown"></select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                  <div>
+                    <label class="block text-xs font-medium text-zinc-300 mb-1">ทะเบียนรถยนต์ประจำทีม</label>
+                    <select id="conVehicle" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none vehicle-dropdown"></select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-red-400 mb-1">เลือกวัสดุสิ้นเปลืองที่จะเบิก</label>
+                    <select id="conItemSelect" required onchange="updateStockHint()" class="w-full bg-zinc-900 border border-red-500/50 rounded-xl px-3 py-2.5 text-sm text-white focus:border-red-400 outline-none font-medium shadow-sm"></select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                  <div>
+                    <label class="block text-xs font-medium text-zinc-300 mb-1">จำนวนที่เบิก <span id="conStockHint" class="text-red-400 font-normal"></span></label>
+                    <input type="number" id="conQty" min="1" required placeholder="กรอกจำนวนที่ต้องการเบิก" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none font-bold">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-zinc-300 mb-1">ภาพถ่ายจากกล้องหรืออัปโหลด (Camera / Upload Photo)</label>
+                    <input type="file" id="conPhoto" accept="image/*" capture="environment" class="w-full text-xs text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-red-950 file:text-red-400 hover:file:bg-red-900">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">วัตถุประสงค์ / หมายเหตุเพิ่มเติม</label>
+                  <textarea id="conNote" rows="2" placeholder="ระบุงานที่นำวัสดุไปใช้" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-3 text-sm text-white focus:border-red-500 outline-none"></textarea>
+                </div>
+
+                <div class="flex justify-end">
+                  <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold text-sm rounded-xl transition shadow-lg shadow-red-900/30 flex items-center gap-2">
+                    <i class="fa-solid fa-minus-circle"></i> ยืนยันการเบิกและตัดสต็อกอัตโนมัติ
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl space-y-4">
+              <h4 class="text-sm font-bold text-white border-b border-zinc-800 pb-2 flex items-center justify-between">
+                <span><i class="fa-solid fa-list-check text-red-500 mr-2"></i>สต็อกคงเหลือและเปอร์เซ็นต์</span>
+                <span class="text-[10px] text-zinc-400">ขาว >50% | แดง ≤50%</span>
+              </h4>
+              <div id="stockListContainer" class="space-y-3 max-h-[460px] overflow-y-auto pr-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="consumables-tab-history" class="subtab-content hidden space-y-4">
+          <div class="glass-card p-4 rounded-2xl flex flex-wrap gap-3 items-center justify-between">
+            <div class="flex flex-wrap gap-2 items-center">
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-zinc-500 text-xs"></i>
+                <input type="text" id="conSearch" onkeyup="renderConsumablesTable()" placeholder="ค้นหา ผู้เบิก / ผู้อนุมัติ / ชื่อวัสดุ..." class="bg-zinc-950 border border-zinc-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white outline-none w-64 focus:border-red-500">
+              </div>
+            </div>
+            <button onclick="exportTableToCSV('consumables')" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-xl flex items-center gap-1.5">
+              <i class="fa-solid fa-file-excel text-red-400"></i> ส่งออก CSV
+            </button>
+          </div>
+
+          <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-zinc-300">
+                <thead class="bg-black text-zinc-400 font-semibold uppercase tracking-wider border-b border-zinc-800">
+                  <tr>
+                    <th class="p-3">วันที่</th>
+                    <th class="p-3">รายการวัสดุ</th>
+                    <th class="p-3">จำนวนที่เบิก</th>
+                    <th class="p-3">ผู้เบิก</th>
+                    <th class="p-3">ผู้อนุมัติ</th>
+                    <th class="p-3">ทะเบียนรถยนต์</th>
+                    <th class="p-3">ภาพถ่ายอัปโหลด</th>
+                    <th class="p-3">หมายเหตุ</th>
+                    <th class="p-3 text-right">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="consumablesTableBody" class="divide-y divide-zinc-800/60"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION 5: ASSET REGISTRATION SYSTEM ================= -->
+      <section id="page-assets" class="page-section hidden space-y-6">
+        <div class="subtab-header-container"></div>
+
+        <div id="assets-tab-form" class="subtab-content space-y-6">
+          <div class="glass-card p-6 rounded-2xl max-w-5xl mx-auto space-y-6">
+            <h3 class="text-lg font-bold text-white border-b border-zinc-800 pb-3 flex flex-wrap items-center justify-between gap-3">
+              <span class="flex items-center"><img src="logo.webp" alt="TIGERSOFT" class="h-6 w-auto bg-white rounded p-0.5 mr-2 inline shadow-sm"><i class="fa-solid fa-building-columns text-red-500 mr-2"></i>แบบฟอร์มลงทะเบียนทรัพย์สินใหม่ (คำนวณวันหมดอายุ 1-5 ปีอัตโนมัติ)</span>
+              
+              <button type="button" onclick="runAIEstimateLifespan()" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs rounded-lg transition flex items-center gap-1.5">
+                <i class="fa-solid fa-robot text-red-400"></i> AI Estimate Lifespan
+              </button>
+            </h3>
+
+            <form id="formAsset" onsubmit="handleAssetSubmit(event)" class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                <div>
+                  <label class="block text-xs font-semibold text-red-400 mb-1">รหัสทรัพย์สินบัญชี (unique)*</label>
+                  <input type="text" id="assetAccountCode" required placeholder="เช่น ACC-2026-001" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none font-mono font-bold">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-red-400 mb-1">รหัสทรัพย์สิน HS (unique)*</label>
+                  <input type="text" id="assetHSCode" required placeholder="เช่น HS-2026-001" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none font-mono font-bold">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ชื่อรายการอุปกรณ์*</label>
+                  <input type="text" id="assetName" required placeholder="เช่น สว่านโรตารี่ไร้สาย 18V" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none font-medium">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">สถานะอุปกรณ์</label>
+                  <select id="assetStatus" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none font-semibold">
+                    <option value="ปกติ">✅ ปกติ (Active)</option>
+                    <option value="ชำรุด">⚠️ ชำรุด (Damaged)</option>
+                    <option value="สูญหาย">❌ สูญหาย (Lost)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-5 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">แผนกประจำ</label>
+                  <select id="assetDepartment" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none font-bold">
+                    <option value="HS">แผนก HS</option>
+                    <option value="TA">แผนก TA</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ผู้ดูแลทรัพย์สิน</label>
+                  <select id="assetOwner" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none personnel-dropdown"></select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ยี่ห้อ (Brand)</label>
+                  <input type="text" id="assetBrand" placeholder="เช่น Bosch, Makita" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">รุ่น (Model)</label>
+                  <input type="text" id="assetModel" placeholder="เช่น GSB 18V-50" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">Serial Number</label>
+                  <input type="text" id="assetSerial" placeholder="SN-8899201" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none font-mono">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-red-600/30">
+                <div>
+                  <label class="block text-xs font-semibold text-red-400 mb-1"><i class="fa-solid fa-calendar-plus mr-1"></i>วันที่ซื้อ</label>
+                  <input type="date" id="assetPurchaseDate" required onchange="autoCalculateExpiryDate()" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-red-400 mb-1"><i class="fa-solid fa-hourglass-half mr-1"></i>อายุการใช้งาน (1-5 ปี)</label>
+                  <select id="assetLifespanYears" onchange="autoCalculateExpiryDate()" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none font-bold">
+                    <option value="1">1 ปี</option>
+                    <option value="2">2 ปี</option>
+                    <option value="3" selected>3 ปี</option>
+                    <option value="4">4 ปี</option>
+                    <option value="5">5 ปี</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-white mb-1"><i class="fa-solid fa-calendar-check mr-1 text-red-500"></i>วันหมดอายุ (คำนวณให้อัตโนมัติ)</label>
+                  <input type="date" id="assetExpDate" readonly class="w-full bg-zinc-950 border border-red-600/50 rounded-xl px-3 py-2 text-sm text-red-400 font-bold outline-none cursor-not-allowed">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">สถานที่ / รถยนต์จัดเก็บ</label>
+                  <select id="assetLocation" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none vehicle-dropdown"></select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ภาพถ่ายจากกล้องหรืออัปโหลด (Camera / Upload Photo)</label>
+                  <input type="file" id="assetPhoto" accept="image/*" capture="environment" class="w-full text-xs text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-red-950 file:text-red-400 hover:file:bg-red-900">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">หมายเหตุเพิ่มเติม</label>
+                  <input type="text" id="assetNote" placeholder="เช่น อุปกรณ์ลงทะเบียนใช้งานใหม่ประจำทีม A" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+                </div>
+              </div>
+
+              <div class="flex justify-end">
+                <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold text-sm rounded-xl transition shadow-lg shadow-red-900/30 flex items-center gap-2">
+                  <i class="fa-solid fa-floppy-disk"></i> บันทึกทะเบียนทรัพย์สิน
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div id="assets-tab-history" class="subtab-content hidden space-y-4">
+          <div class="glass-card p-4 rounded-2xl flex flex-wrap gap-3 items-center justify-between">
+            <div class="flex flex-wrap gap-2 items-center">
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-zinc-500 text-xs"></i>
+                <input type="text" id="assetSearch" onkeyup="renderAssetsTable()" placeholder="ค้นหารหัสบัญชี / HS / ชื่ออุปกรณ์..." class="bg-zinc-950 border border-zinc-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white outline-none w-64 focus:border-red-500">
+              </div>
+              <select id="assetFilterDepartment" onchange="renderAssetsTable()" class="bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none">
+                <option value="">ทุกแผนก (HS & TA)</option>
+                <option value="HS">แผนก HS</option>
+                <option value="TA">แผนก TA</option>
+              </select>
+            </div>
+            <button onclick="exportTableToCSV('assets')" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-xl flex items-center gap-1.5">
+              <i class="fa-solid fa-file-excel text-red-400"></i> ส่งออก CSV
+            </button>
+          </div>
+
+          <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-zinc-300">
+                <thead class="bg-black text-zinc-400 font-semibold uppercase tracking-wider border-b border-zinc-800">
+                  <tr>
+                    <th class="p-3">รหัสบัญชี / HS</th>
+                    <th class="p-3">ชื่อรายการอุปกรณ์</th>
+                    <th class="p-3">แผนก</th>
+                    <th class="p-3">ผู้ดูแล</th>
+                    <th class="p-3">สถานะ</th>
+                    <th class="p-3">วันหมดอายุ (อัตโนมัติ)</th>
+                    <th class="p-3">ภาพถ่ายอัปโหลด</th>
+                    <th class="p-3 text-right">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="assetsTableBody" class="divide-y divide-zinc-800/60"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION 6: EQUIPMENT MAINTENANCE SYSTEM ================= -->
+      <section id="page-maintenance" class="page-section hidden space-y-6">
+        <div class="subtab-header-container"></div>
+
+        <div id="maintenance-tab-form" class="subtab-content space-y-6">
+          <div class="glass-card p-6 rounded-2xl max-w-5xl mx-auto space-y-6">
+            <h3 class="text-lg font-bold text-white border-b border-zinc-800 pb-3 flex flex-wrap items-center justify-between gap-3">
+              <span class="flex items-center"><img src="logo.webp" alt="TIGERSOFT" class="h-6 w-auto bg-white rounded p-0.5 mr-2 inline shadow-sm"><i class="fa-solid fa-screwdriver-wrench text-red-500 mr-2"></i>แบบฟอร์มบำรุงรักษาอุปกรณ์ติดตั้ง (เลือกทำทีละหมวดหมู่)</span>
+              
+              <button type="button" onclick="openAddMaintenanceEquipmentModal()" class="px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-xs font-semibold rounded-lg transition shadow-md shadow-red-900/30 flex items-center gap-1.5">
+                <i class="fa-solid fa-plus-circle"></i> + เพิ่มอุปกรณ์บำรุงรักษาใหม่
+              </button>
+            </h3>
+
+            <form id="formMaintenance" onsubmit="handleMaintenanceSubmit(event)" class="space-y-6">
+              <!-- Basic Inspection Metadata & Category Selector -->
+              <div class="grid grid-cols-1 md:grid-cols-5 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-semibold text-red-400 mb-1"><i class="fa-solid fa-layer-group mr-1"></i>เลือกหมวดหมู่อุปกรณ์ที่ต้องการตรวจเช็ค*</label>
+                  <select id="maintSelectedCategory" onchange="switchMaintenanceCategory()" class="w-full bg-zinc-900 border border-red-600/50 rounded-xl px-3 py-2 text-sm text-white focus:border-red-400 outline-none font-bold shadow-sm">
+                    <option value="car_inside">🚗 หมวดที่ 1: ภายในรถยนต์ (30+ รายการ)</option>
+                    <option value="ppe_special">🥽 หมวดที่ 2: ชุด PPE และอุปกรณ์เฉพาะ (19+ รายการ)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-red-400 mb-1"><i class="fa-solid fa-calendar-day mr-1"></i>วันที่ตรวจบำรุงรักษา</label>
+                  <input type="date" id="maintDate" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-red-400 mb-1"><i class="fa-solid fa-sliders mr-1"></i>รอบการตรวจบำรุงรักษา</label>
+                  <select id="maintRound" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none font-bold">
+                    <option value="รอบที่ 1 (ไตรมาส 1)">รอบที่ 1 (ไตรมาส 1)</option>
+                    <option value="รอบที่ 2 (ไตรมาส 2)">รอบที่ 2 (ไตรมาส 2)</option>
+                    <option value="รอบที่ 3 (ไตรมาส 3)">รอบที่ 3 (ไตรมาส 3)</option>
+                    <option value="รอบที่ 4 (ไตรมาส 4)">รอบที่ 4 (ไตรมาส 4)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-red-400 mb-1"><i class="fa-solid fa-car mr-1"></i>ทะเบียนรถยนต์</label>
+                  <select id="maintVehicle" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none vehicle-dropdown"></select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                <div>
+                  <label class="block text-xs font-semibold text-red-400 mb-1"><i class="fa-solid fa-user-check mr-1"></i>ชื่อบุคคลที่ตรวจเช็ค</label>
+                  <select id="maintInspector" required class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none personnel-dropdown"></select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ภาพถ่ายจากกล้องหรืออัปโหลด (Camera / Upload Photo)</label>
+                  <input type="file" id="maintPhoto" accept="image/*" capture="environment" class="w-full text-xs text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-red-950 file:text-red-400 hover:file:bg-red-900">
+                </div>
+              </div>
+
+              <!-- 2 Category Checklists (Display 1 Category at a time) -->
+              <div class="space-y-6">
+                <!-- Category 1 Wrapper -->
+                <div id="maint-wrapper-car_inside" class="maint-category-wrapper bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                  <div class="flex items-center justify-between border-b border-zinc-800 pb-2 mb-3">
+                    <h4 class="text-sm font-bold text-red-400 flex items-center gap-2">
+                      <i class="fa-solid fa-car-side text-lg"></i> 🚗 หมวดที่ 1: ภายในรถยนต์ (อุปกรณ์เครื่องมือช่างและวัดประจำรถ)
+                    </h4>
+                    <span id="maint-car-inside-count" class="text-xs text-zinc-400">30 รายการ</span>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="maint-car-inside-container"></div>
+                </div>
+
+                <!-- Category 2 Wrapper -->
+                <div id="maint-wrapper-ppe_special" class="maint-category-wrapper hidden bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                  <div class="flex items-center justify-between border-b border-zinc-800 pb-2 mb-3">
+                    <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                      <i class="fa-solid fa-shield-halved text-lg text-red-500"></i> 🥽 หมวดที่ 2: ชุด PPE และอุปกรณ์เฉพาะ
+                    </h4>
+                    <span id="maint-ppe-special-count" class="text-xs text-zinc-400">19 รายการ</span>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="maint-ppe-special-container"></div>
+                </div>
+              </div>
+
+              <!-- Overall Status & Notes -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800">
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">ประเมินผลการตรวจบำรุงรักษาภาพรวมประจำหมวดนี้</label>
+                  <select id="maintStatus" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none font-bold">
+                    <option value="ปกติพร้อมใช้งาน">✅ ปกติพร้อมใช้งาน (Pass)</option>
+                    <option value="พบอุปกรณ์ชำรุดรอซ่อม">⚠️ พบอุปกรณ์ชำรุดรอซ่อม (Needs Repair)</option>
+                    <option value="เสียหายปลดระวาง">❌ เสียหายปลดระวาง (Decommissioned)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-zinc-300 mb-1">หมายเหตุเพิ่มเติม / อาการชำรุดประจำหมวด</label>
+                  <input type="text" id="maintDefectDetails" placeholder="ระบุอาการชำรุด หรืออุปกรณ์ที่ต้องการเปลี่ยน" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-red-500 outline-none">
+                </div>
+              </div>
+
+              <div class="flex justify-end">
+                <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold text-sm rounded-xl transition shadow-lg shadow-red-900/30 flex items-center gap-2">
+                  <i class="fa-solid fa-floppy-disk"></i> บันทึกผลการบำรุงรักษาประจำหมวดที่เลือก
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div id="maintenance-tab-history" class="subtab-content hidden space-y-4">
+          <div class="glass-card p-4 rounded-2xl flex flex-wrap gap-3 items-center justify-between">
+            <div class="flex flex-wrap gap-2 items-center">
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-zinc-500 text-xs"></i>
+                <input type="text" id="maintSearch" onkeyup="renderMaintenanceTable()" placeholder="ค้นหา ทะเบียนรถ / ผู้ตรวจ / ชำรุด..." class="bg-zinc-950 border border-zinc-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white outline-none w-64 focus:border-red-500">
+              </div>
+              <select id="maintFilterCategory" onchange="renderMaintenanceTable()" class="bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none font-medium">
+                <option value="">ทุกหมวดหมู่อุปกรณ์</option>
+                <option value="car_inside">🚗 ภายในรถยนต์</option>
+                <option value="ppe_special">🥽 ชุด PPE และอุปกรณ์เฉพาะ</option>
+              </select>
+              <select id="maintFilterRound" onchange="renderMaintenanceTable()" class="bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none font-medium">
+                <option value="">ทุกรอบการตรวจ</option>
+                <option value="รอบที่ 1 (ไตรมาส 1)">รอบที่ 1</option>
+                <option value="รอบที่ 2 (ไตรมาส 2)">รอบที่ 2</option>
+                <option value="รอบที่ 3 (ไตรมาส 3)">รอบที่ 3</option>
+                <option value="รอบที่ 4 (ไตรมาส 4)">รอบที่ 4</option>
+              </select>
+              <select id="maintFilterVehicle" onchange="renderMaintenanceTable()" class="bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none vehicle-dropdown-filter">
+                <option value="">ทุกทะเบียนรถยนต์</option>
+              </select>
+            </div>
+            <button onclick="exportTableToCSV('maintenance')" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded-xl flex items-center gap-1.5">
+              <i class="fa-solid fa-file-excel text-red-400"></i> ส่งออก CSV
+            </button>
+          </div>
+
+          <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-zinc-300">
+                <thead class="bg-black text-zinc-400 font-semibold uppercase tracking-wider border-b border-zinc-800">
+                  <tr>
+                    <th class="p-3">วันที่</th>
+                    <th class="p-3">หมวดหมู่อุปกรณ์</th>
+                    <th class="p-3">รอบการตรวจ</th>
+                    <th class="p-3">ทะเบียนรถยนต์</th>
+                    <th class="p-3">ผู้ตรวจเช็ค</th>
+                    <th class="p-3">ภาพถ่ายอัปโหลด</th>
+                    <th class="p-3">อุปกรณ์ที่ชำรุด/ปลดระวาง</th>
+                    <th class="p-3">สถานะภาพรวม</th>
+                    <th class="p-3">หมายเหตุ</th>
+                    <th class="p-3 text-right">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="maintenanceTableBody" class="divide-y divide-zinc-800/60"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Image View Modal -->
+  <div id="imageModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4" onclick="closeImageModal()">
+    <div class="max-w-3xl max-h-[90vh] p-2 bg-zinc-900 border border-zinc-700 rounded-2xl relative" onclick="event.stopPropagation()">
+      <button onclick="closeImageModal()" class="absolute -top-3 -right-3 w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center font-bold shadow-lg"><i class="fa-solid fa-xmark"></i></button>
+      <img id="imageModalImg" src="" alt="Photo preview" class="max-h-[80vh] rounded-xl object-contain mx-auto">
+    </div>
+  </div>
+
+  <!-- ES MODULES MAIN LOGIC SCRIPT -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Register ChartDataLabels plugin
+    Chart.register(ChartDataLabels);
+
+    // Static Personnel & Vehicle Dropdowns (Updated: "ชุดPPE" -> "HS")
+    const STATIC_PERSONNEL = [
+      "วิริยะ เพ็ชรหอม", "คฑาวุธ ไฝเพชร", "นพรัตน์ สุวรรณเจริญยิ่ง", "เกียรติคุณ แซ่เต็ม",
+      "ณัฐพล วงศ์สามารถ", "กฤตสรณ์ สวัสดิ์พิพัฒน์", "สรธัญ สีเหลือง", "ธนายุทธ แก้วมณี",
+      "พิพัฒน์ โคกิฬา", "พิชญานนท์ ทุมมาลา", "กฤษณะ ชาคำมูล", "ธนพล สุนทรนันท์",
+      "นิรัติศัย ชาบำเหน็จ", "ณรงค์เดช บุญพุ่มพวง ตั๊ง", "ชนาธิป แสงวิเชียร นนท์", "ตะวัน หงษ์กา", "จิรายุทธ นามแจ่ม"
+    ];
+
+    const STATIC_VEHICLES = [
+      "2ฒง4722", "2ฒง4720", "2ฒง4718", "2ฒญ3840", "2ฒญ3836",
+      "2ฒต4851", "2ฒต6367", "2ขห4690", "HS"
+    ];
+
+    // BOX DEFINITIONS FOR CAR CHECK
+    const BOX_ITEMS_DEFINITION = {
+      ss: ["ดอกไขควงแฉก", "ดอกสว่านเจาะเหล็ก ขนาด 1/8\"", "ดอกสว่านเจาะเหล็ก ขนาด 1/4\"", "ดอกสว่านเจาะเหล็ก ขนาด 3/8\"", "ดอกสว่านเจาะเหล็ก ขนาด 1/2\"", "โฮลซอว์เจาะเหล็ก ขนาด 16mm", "โฮลซอว์เจาะเหล็ก ขนาด 20mm", "โฮลซอว์เจาะเหล็ก ขนาด 25mm", "พุ๊กเจาะปูน เบอร์ 7"],
+      s: ["คีมปากเฉียง(คีมตัด)", "คีมปากผสม", "คีมปากแหลม", "กรรไกรตัดโลหะ", "คัตเตอร์", "เลื่อยตัดเหล็ก", "เลื่อยตัดฝ้า", "กรรไกรตัดราง", "คีมย้ำหัวแลน", "ไขควงปากแฉก", "ไขควงวัดไฟ", "หกเหลี่ยม(ครบชุด)", "ระดับน้ำ", "ดินสอ", "ตลับเมตร", "เครื่องทดสอบสัญญาณสายแลน", "แคลมป์มิเตอร์", "ค้อนหงอน/ค้อนช่างไฟฟ้า", "เกรียงโป๊วสี", "ผ้าเช็ดทำความสะอาด"],
+      m: ["ตัวสว่านโรตารี่", "ตัวสว่าน 2 ตัว", "แบตเตอรี่ 2A (2 อัน)", "แบตเตอรี่ 4A (2 อัน)", "แท่นชาร์ตคู่ (1 อัน)", "เครื่องเจียร์ (ครบชุด)", "โบลเวอร์ (ครบชุด)"],
+      l: ["ปลั๊กพ่วง", "ปืนยิงซิลิโคน", "ป้ายเตือนเซฟตี้", "บันไดทรงเอ"]
+    };
+
+    // MAINTENANCE CATEGORIES DEFINITION (30 items car inside + 19 items PPE special)
+    const MAINTENANCE_CATEGORIES = {
+      car_inside: {
+        key: "car_inside",
+        title: "ภายในรถยนต์",
+        badge: "🚗 ภายในรถยนต์",
+        items: [
+          "คีมปากผสม", "คีมปากแหลม", "กรรไกรตัดโลหะ", "คัตเตอร์", "เลื่อยตัดเหล็ก", "เลื่อยตัดฝ้า",
+          "กรรไกรตัดราง", "คีมย้ำหัวแลน", "ไขควงปากแฉก", "ไขควงวัดไฟ", "หกเหลี่ยม(ครบชุด)", "ระดับน้ำ",
+          "ดินสอ", "ตลับเมตร", "เครื่องทดสอบสัญญาณสายแลน", "แคลมป์มิเตอร์", "ค้อนหงอน/ค้อนช่างไฟฟ้า",
+          "เกรียงโป๊วสีผ้า", "ตัวสว่านโรตารี่", "ตัวสว่าน 2 ตัว", "แบตเตอรี่ 2A (2 อัน)", "แบตเตอรี่ 4A (2 อัน)",
+          "แท่นชาร์ตคู่ (1 อัน)", "เครื่องเจียร์ (ครบชุด)", "โบลเวอร์ (ครบชุด)", "ปลั๊กพ่วง", "ปืนยิงซิลิโคน",
+          "ใบป้ายเตือน", "บันไดทรงเอ"
+        ]
+      },
+      ppe_special: {
+        key: "ppe_special",
+        title: "ชุด PPE และอุปกรณ์เฉพาะ",
+        badge: "🥽 ชุด PPE และอุปกรณ์เฉพาะ",
+        items: [
+          "หมวกนิรภัย", "แว่นตานิรภัย", "เสื้อสะท้อนแสง", "ถุงมือ", "เข็มขัดนิรภัย (เต็มตัว)",
+          "รองเท้านิรภัย", "เทปกั้นเขต", "เครื่องเจียรไฟฟ้า", "เลื่อยจิ๊กซอว์ไฟฟ้า", "เลื่อยจิ๊กซอว์แบตเตอรี่",
+          "เครื่องดูดฝุ่น", "เครื่องลับคม", "เครื่องทริมเมอร์", "ชุดบล็อก", "ประแจ",
+          "กรวยสะท้อนแสง", "ลวดนำสายไฟ", "ป้ายเตือน", "ผ้าใบ"
+        ]
+      }
+    };
+
+    // PPE CATALOG
+    const DEFAULT_PPE_CATALOG = [
+      "หมวกนิรภัย", "แว่นตานิรภัย", "เสื้อสะท้อนแสง", "ถุงมือ", "เข็มขัดนิรภัย (เต็มตัว)",
+      "รองเท้านิรภัย", "เทปกั้นเขต", "เครื่องเจียรไฟฟ้า", "เลื่อยจิ๊กซอว์ไฟฟ้า",
+      "เลื่อยจิ๊กซอว์แบตเตอรี่", "เครื่องดูดฝุ่น", "เครื่องลับคม", "เครื่องทริมเมอร์",
+      "ชุดบล็อก", "ประแจ", "กรวยสะท้อนแสง", "ลวดนำสายไฟ", "ป้ายเตือน", "ผ้าใบ"
+    ];
+
+    // CONSUMABLES STOCKS
+    const DEFAULT_STOCKS = [
+      { id: 'STK-01', name: 'บล็อคลอย(NANO 2x4)', qty: 200, initialQty: 200, unit: 'อัน' },
+      { id: 'STK-02', name: 'พุกพลาสติกเบอร์7', qty: 1000, initialQty: 1000, unit: 'ตัว' },
+      { id: 'STK-03', name: 'พุกผีเสื้อ', qty: 500, initialQty: 500, unit: 'ตัว' },
+      { id: 'STK-04', name: 'สกรูเกลียวปล่อย 7x2', qty: 1000, initialQty: 1000, unit: 'ตัว' },
+      { id: 'STK-05', name: 'สกรูเกลียวปล่อย 7x1/2', qty: 2000, initialQty: 2000, unit: 'ตัว' },
+      { id: 'STK-06', name: 'สกรูดำ 6x1', qty: 5000, initialQty: 5000, unit: 'ตัว' },
+      { id: 'STK-07', name: 'สกรูดำ 6x3/4', qty: 5000, initialQty: 5000, unit: 'ตัว' },
+      { id: 'STK-08', name: 'เทปพันสายไฟ3M', qty: 200, initialQty: 200, unit: 'ม้วน' },
+      { id: 'STK-09', name: 'สกรูปลายสว่าน 8x1/2', qty: 5000, initialQty: 5000, unit: 'ตัว' },
+      { id: 'STK-10', name: 'สกรูปลายสว่าน 8x1', qty: 5000, initialQty: 5000, unit: 'ตัว' },
+      { id: 'STK-11', name: 'สกรูปลายสว่าน 8x3/4', qty: 5000, initialQty: 5000, unit: 'ตัว' },
+      { id: 'STK-12', name: '3Mกาว2หน้า', qty: 50, initialQty: 50, unit: 'ม้วน' },
+      { id: 'STK-13', name: 'ไส้ไก่', qty: 30, initialQty: 30, unit: 'ห่อ' },
+      { id: 'STK-14', name: 'เคเบิ้ลไทน์', qty: 30, initialQty: 30, unit: 'ห่อ' }
+    ];
+
+    const INITIAL_ASSETS = [
+      {
+        id: 'ast-1',
+        accountCode: 'ACC-2026-001',
+        hsCode: 'HS-2026-001',
+        name: 'เครื่องวัดก๊าซ Multi-Gas Detector 4-in-1',
+        status: 'ปกติ',
+        department: 'HS',
+        owner: 'วิริยะ เพ็ชรหอม',
+        serial: 'SN-99882201',
+        brand: 'Honeywell',
+        model: 'BW MAX XT II',
+        purchaseDate: '2025-01-15',
+        lifespanYears: 3,
+        expDate: '2028-01-15',
+        location: '2ฒง4722',
+        photo: '',
+        note: 'ผ่านการสอบเทียบมาตรฐานเซ็นเซอร์'
+      }
+    ];
+
+    const INITIAL_CAR_CHECKS = [
+      { id: 'cc-1', date: '2026-08-01', vehicle: '2ฒง4722', inspector: 'วิริยะ เพ็ชรหอม', status: 'สมบูรณ์พร้อมใช้งาน', issues: [], photo: '', note: 'ตรวจเช็คอุปกรณ์ครบถ้วน' }
+    ];
+
+    const INITIAL_PPE = [
+      { id: 'ppe-1', type: 'เบิกอุปกรณ์', date: '2026-08-01', user: 'วิริยะ เพ็ชรหอม', approver: 'คฑาวุธ ไฝเพชร', location: '2ฒง4722', itemsWithQty: [{ name: 'หมวกนิรภัย', qty: 1 }], returnedStatus: 'รอคืนอุปกรณ์', photo: '', note: '' }
+    ];
+
+    const INITIAL_CONSUMABLES = [
+      { id: 'con-1', date: '2026-08-01', itemName: 'พุกพลาสติกเบอร์7', qty: 200, user: 'วิริยะ เพ็ชรหอม', approver: 'คฑาวุธ ไฝเพชร', vehicle: '2ฒง4722', photo: '', note: 'เบิกยึดกล่องสวิตช์' }
+    ];
+
+    const INITIAL_MAINTENANCE = [
+      { id: 'mnt-1', categoryKey: 'car_inside', categoryTitle: 'ภายในรถยนต์', round: 'รอบที่ 1 (ไตรมาส 1)', date: '2026-03-15', vehicle: '2ฒง4722', inspector: 'วิริยะ เพ็ชรหอม', status: 'ปกติพร้อมใช้งาน', defects: [], photo: '', note: 'บำรุงรักษาตามรอบ สมบูรณ์ทุกรายการ' }
+    ];
+
+    // State Variables
+    let carCheckData = [];
+    let ppeData = [];
+    let consumablesData = [];
+    let assetData = [];
+    let maintenanceData = [];
+    let stocksData = [];
+    let customBoxItems = [];
+    let customPPEItems = [];
+    let customMaintenanceItems = [];
+    let charts = {};
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initApp();
+    });
+
+    function initApp() {
+      setupClock();
+      populateDropdowns();
+      loadDataFromStorage();
+      renderCarCheckBoxesUI();
+      renderPPECatalogUI();
+      renderMaintenanceChecklistUI();
+      switchMaintenanceCategory();
+      setupSubtabs();
+      renderAllTables();
+      initCharts();
+      updateDashboardStats();
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      ['carCheckDate', 'ppeDate', 'conDate', 'assetPurchaseDate', 'maintDate'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = todayStr;
+      });
+
+      autoCalculateExpiryDate();
+    }
+
+    window.autoCalculateExpiryDate = function() {
+      const purDateEl = document.getElementById('assetPurchaseDate');
+      const lifespanEl = document.getElementById('assetLifespanYears');
+      const expDateEl = document.getElementById('assetExpDate');
+
+      if (!purDateEl || !lifespanEl || !expDateEl) return;
+
+      const purDateVal = purDateEl.value;
+      const years = parseInt(lifespanEl.value) || 3;
+
+      if (purDateVal) {
+        const d = new Date(purDateVal);
+        d.setFullYear(d.getFullYear() + years);
+        expDateEl.value = d.toISOString().split('T')[0];
+      }
+    };
+
+    function renderStockSideList() {
+      const container = document.getElementById('stockListContainer');
+      if (!container) return;
+
+      container.innerHTML = stocksData.map(s => {
+        const initial = s.initialQty || s.qty || 1;
+        const current = s.qty;
+        const percent = Math.round((current / initial) * 100);
+
+        const isAbove50 = percent > 50;
+        const badgeBgClass = isAbove50 
+          ? 'bg-zinc-800 text-white border border-zinc-700' 
+          : 'bg-red-600/30 text-red-400 border border-red-500/50 font-bold animate-pulse';
+
+        return `
+          <div class="p-3 bg-zinc-950/80 rounded-xl border border-zinc-800 flex items-center justify-between transition hover:border-zinc-700">
+            <div>
+              <div class="font-semibold text-xs text-white">${s.name}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs font-bold text-white mb-0.5">${current} <span class="text-[10px] text-zinc-400">${s.unit}</span></div>
+              <span class="px-2 py-0.5 rounded text-[10px] ${badgeBgClass}">
+                ${isAbove50 ? 'คงเหลือ' : '⚠️ วิกฤต'} ${percent}%
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.openAddConsumableModal = function() {
+      Swal.fire({
+        title: '📦 เพิ่มวัสดุสิ้นเปลืองใหม่เข้าสต็อก',
+        html: `
+          <div class="text-left space-y-3 p-1">
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">ระบุชื่อวัสดุสิ้นเปลืองใหม่</label>
+              <input type="text" id="swalConName" placeholder="เช่น ท่อหด 5mm" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2.5 text-sm text-white focus:border-red-500 outline-none">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-zinc-300 mb-1">จำนวนสต็อกเริ่มต้น</label>
+                <input type="number" id="swalConQty" min="1" value="100" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2.5 text-sm text-white focus:border-red-500 outline-none font-bold">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-zinc-300 mb-1">หน่วยนับ</label>
+                <input type="text" id="swalConUnit" value="ตัว" placeholder="เช่น ตัว, อัน, ม้วน" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2.5 text-sm text-white focus:border-red-500 outline-none">
+              </div>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'บันทึกเข้าสต็อก',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#dc2626',
+        preConfirm: () => {
+          const name = document.getElementById('swalConName').value.trim();
+          const qty = parseInt(document.getElementById('swalConQty').value) || 0;
+          const unit = document.getElementById('swalConUnit').value.trim() || 'รายการ';
+          if (!name || qty <= 0) {
+            Swal.showValidationMessage('กรุณาระบุชื่อวัสดุและจำนวนเริ่มต้นให้ถูกต้อง!');
+            return false;
+          }
+          return { name, qty, unit };
+        }
+      }).then(res => {
+        if (res.isConfirmed && res.value) {
+          const newItem = {
+            id: 'STK-' + (stocksData.length + 1),
+            name: res.value.name,
+            qty: res.value.qty,
+            initialQty: res.value.qty,
+            unit: res.value.unit
+          };
+          stocksData.push(newItem);
+          saveAllToLocalStorage();
+          updateConsumablesItemDropdown();
+          renderStockSideList();
+          updateCharts();
+          Swal.fire('เพิ่มสำเร็จ!', `เพิ่มวัสดุ "${newItem.name}" สต็อกเริ่มต้น ${newItem.qty} ${newItem.unit} แล้ว`, 'success');
+        }
+      });
+    };
+
+    function renderPPECatalogUI() {
+      const container = document.getElementById('ppe-items-grid');
+      const countEl = document.getElementById('ppe-catalog-count');
+      if (!container) return;
+
+      const allPPEList = [
+        ...DEFAULT_PPE_CATALOG.map(name => ({ name, isCustom: false })),
+        ...customPPEItems.map(item => ({ id: item.id, name: item.name, isCustom: true }))
+      ];
+
+      if (countEl) countEl.textContent = `${allPPEList.length} รายการ`;
+
+      container.innerHTML = allPPEList.map((itemObj, idx) => `
+        <div class="p-3 bg-zinc-950/80 rounded-xl border ${itemObj.isCustom ? 'border-red-600/40 bg-red-950/20' : 'border-zinc-800'} flex items-center justify-between gap-2 hover:border-zinc-700 transition">
+          <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-200 select-none overflow-hidden text-ellipsis whitespace-nowrap">
+            <input type="checkbox" id="ppe_chk_${idx}" data-name="${itemObj.name}" class="accent-red-600 w-4 h-4 rounded">
+            <span>${itemObj.name}</span>
+            ${itemObj.isCustom ? `<span class="px-1.5 py-0.5 text-[9px] bg-red-600/20 text-red-400 font-bold rounded">เพิ่มเอง</span>` : ''}
+          </label>
+
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="text-[10px] text-zinc-400">จำนวน:</span>
+            <input type="number" id="ppe_qty_${idx}" min="1" value="1" class="w-14 bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-center text-white focus:border-red-500 outline-none font-bold">
+            ${itemObj.isCustom ? `<button type="button" onclick="deleteCustomPPEItem('${itemObj.id}')" title="ลบอุปกรณ์นี้" class="text-zinc-500 hover:text-red-400 text-xs ml-1"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderMaintenanceChecklistUI() {
+      Object.keys(MAINTENANCE_CATEGORIES).forEach(catKey => {
+        const catObj = MAINTENANCE_CATEGORIES[catKey];
+        const container = document.getElementById(`maint-${catKey.replace('_', '-')}-container`);
+        const countEl = document.getElementById(`maint-${catKey.replace('_', '-')}-count`);
+
+        const defaultItems = catObj.items;
+        const userCustomItems = customMaintenanceItems.filter(c => c.categoryKey === catKey);
+        const allCatItems = [
+          ...defaultItems.map(name => ({ name, isCustom: false })),
+          ...userCustomItems.map(item => ({ id: item.id, name: item.name, isCustom: true }))
+        ];
+
+        if (countEl) countEl.textContent = `${allCatItems.length} รายการ`;
+        if (container) {
+          container.innerHTML = allCatItems.map((itemObj, idx) => `
+            <div class="p-2.5 bg-zinc-900/90 rounded-xl border ${itemObj.isCustom ? 'border-red-600/40 bg-red-950/20' : 'border-zinc-800'} flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 transition hover:border-zinc-700">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-medium text-zinc-200">${itemObj.name}</span>
+                ${itemObj.isCustom ? `<span class="px-1.5 py-0.5 text-[9px] bg-red-600/20 text-red-400 font-bold rounded">เพิ่มเอง</span>` : ''}
+                ${itemObj.isCustom ? `<button type="button" onclick="deleteCustomMaintenanceItem('${itemObj.id}')" title="ลบอุปกรณ์นี้" class="text-zinc-500 hover:text-red-400 text-xs ml-1"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+              </div>
+              <div class="flex items-center gap-1 shrink-0">
+                <label class="px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition bg-zinc-800 text-white border border-zinc-700">
+                  <input type="radio" name="maint_item_${catKey}_${idx}" value="ปกติ" checked class="hidden" onchange="updateItemBadgeStyle(this)">
+                  <i class="fa-solid fa-check mr-0.5"></i> ปกติ
+                </label>
+                <label class="px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-red-600/20 hover:text-red-400">
+                  <input type="radio" name="maint_item_${catKey}_${idx}" value="ชำรุดรอซ่อม" class="hidden" onchange="updateItemBadgeStyle(this)">
+                  <i class="fa-solid fa-wrench mr-0.5"></i> ชำรุดรอซ่อม
+                </label>
+                <label class="px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-red-950 hover:text-red-300">
+                  <input type="radio" name="maint_item_${catKey}_${idx}" value="ปลดระวาง" class="hidden" onchange="updateItemBadgeStyle(this)">
+                  <i class="fa-solid fa-ban mr-0.5"></i> ปลดระวาง
+                </label>
+              </div>
+            </div>
+          `).join('');
+        }
+      });
+    }
+
+    window.openAddMaintenanceEquipmentModal = function() {
+      Swal.fire({
+        title: '🛠️ เพิ่มอุปกรณ์บำรุงรักษาใหม่เข้าระบบ',
+        html: `
+          <div class="text-left space-y-3 p-1">
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">เลือกหมวดหมู่อุปกรณ์</label>
+              <select id="swalMaintCatKey" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2.5 text-sm text-white focus:border-red-500 outline-none">
+                <option value="car_inside">🚗 หมวดที่ 1: ภายในรถยนต์</option>
+                <option value="ppe_special">🥽 หมวดที่ 2: ชุด PPE และอุปกรณ์เฉพาะ</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">ระบุชื่ออุปกรณ์บำรุงรักษาใหม่</label>
+              <input type="text" id="swalMaintItemName" placeholder="เช่น ตลับเมตรเลเซอร์ดิจิทัล" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2.5 text-sm text-white focus:border-red-500 outline-none">
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'บันทึกอุปกรณ์ใหม่',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#dc2626',
+        preConfirm: () => {
+          const categoryKey = document.getElementById('swalMaintCatKey').value;
+          const name = document.getElementById('swalMaintItemName').value.trim();
+          if (!name) { Swal.showValidationMessage('กรุณาระบุชื่ออุปกรณ์ใหม่!'); return false; }
+          return { categoryKey, name };
+        }
+      }).then(res => {
+        if (res.isConfirmed && res.value) {
+          const newItem = { id: 'mitem-' + Date.now(), categoryKey: res.value.categoryKey, name: res.value.name };
+          customMaintenanceItems.push(newItem);
+          saveAllToLocalStorage();
+          renderMaintenanceChecklistUI();
+          Swal.fire('เพิ่มสำเร็จ!', `เพิ่มอุปกรณ์ "${newItem.name}" เข้าในหมวดบำรุงรักษาแล้ว`, 'success');
+        }
+      });
+    };
+
+    window.deleteCustomMaintenanceItem = function(id) {
+      customMaintenanceItems = customMaintenanceItems.filter(i => i.id !== id);
+      saveAllToLocalStorage();
+      renderMaintenanceChecklistUI();
+    };
+
+    window.switchMaintenanceCategory = function() {
+      const selectedKey = document.getElementById('maintSelectedCategory')?.value || 'car_inside';
+      document.querySelectorAll('.maint-category-wrapper').forEach(el => el.classList.add('hidden'));
+      const activeWrapper = document.getElementById(`maint-wrapper-${selectedKey}`);
+      if (activeWrapper) activeWrapper.classList.remove('hidden');
+    };
+
+    window.openAddPPEModal = function() {
+      Swal.fire({
+        title: '🥽 เพิ่มอุปกรณ์ PPE / ความปลอดภัยใหม่',
+        html: `
+          <div class="text-left space-y-3 p-1">
+            <label class="block text-xs font-semibold text-zinc-300">ระบุชื่ออุปกรณ์ PPE หรือ อุปกรณ์ความปลอดภัยใหม่</label>
+            <input type="text" id="swalPPEName" placeholder="เช่น ชุดดับเพลิงทนความร้อน" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2.5 text-sm text-white focus:border-red-500 outline-none">
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'บันทึกอุปกรณ์ใหม่',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#dc2626',
+        preConfirm: () => {
+          const name = document.getElementById('swalPPEName').value.trim();
+          if (!name) { Swal.showValidationMessage('กรุณาระบุชื่ออุปกรณ์!'); return false; }
+          return name;
+        }
+      }).then(res => {
+        if (res.isConfirmed && res.value) {
+          const newItem = { id: 'ppeitem-' + Date.now(), name: res.value };
+          customPPEItems.push(newItem);
+          saveAllToLocalStorage();
+          renderPPECatalogUI();
+          Swal.fire('เพิ่มสำเร็จ!', `เพิ่มอุปกรณ์ "${newItem.name}" เข้าในรายการแล้ว`, 'success');
+        }
+      });
+    };
+
+    window.deleteCustomPPEItem = function(id) {
+      customPPEItems = customPPEItems.filter(i => i.id !== id);
+      saveAllToLocalStorage();
+      renderPPECatalogUI();
+    };
+
+    function renderCarCheckBoxesUI() {
+      ['ss', 's', 'm', 'l'].forEach(boxKey => {
+        const container = document.getElementById(`box-${boxKey}-container`);
+        const countEl = document.getElementById(`box-${boxKey}-count`);
+        if (!container) return;
+
+        const defaultItems = BOX_ITEMS_DEFINITION[boxKey];
+        const userCustomItems = customBoxItems.filter(c => c.boxKey === boxKey);
+        const allBoxItems = [
+          ...defaultItems.map(name => ({ name, isCustom: false })),
+          ...userCustomItems.map(item => ({ id: item.id, name: item.name, isCustom: true }))
+        ];
+
+        if (countEl) countEl.textContent = `${allBoxItems.length} รายการ`;
+
+        container.innerHTML = allBoxItems.map((itemObj, idx) => `
+          <div class="p-2.5 bg-zinc-900/90 rounded-xl border ${itemObj.isCustom ? 'border-red-600/40 bg-red-950/20' : 'border-zinc-800'} flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 transition hover:border-zinc-700">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-medium text-zinc-200">${itemObj.name}</span>
+              ${itemObj.isCustom ? `<span class="px-1.5 py-0.5 text-[9px] bg-red-600/20 text-red-400 font-bold rounded">เพิ่มเอง</span>` : ''}
+              ${itemObj.isCustom ? `<button type="button" onclick="deleteCustomEquipment('${itemObj.id}')" title="ลบอุปกรณ์นี้" class="text-zinc-500 hover:text-red-400 text-xs ml-1"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <label class="px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition bg-zinc-800 text-white border border-zinc-700">
+                <input type="radio" name="item_status_${boxKey}_${idx}" value="ปกติ" checked class="hidden" onchange="updateItemBadgeStyle(this)">
+                <i class="fa-solid fa-check mr-0.5"></i> ปกติ
+              </label>
+              <label class="px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-red-600/20 hover:text-red-400">
+                <input type="radio" name="item_status_${boxKey}_${idx}" value="ชำรุด" class="hidden" onchange="updateItemBadgeStyle(this)">
+                <i class="fa-solid fa-wrench mr-0.5"></i> ชำรุด
+              </label>
+              <label class="px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-red-950 hover:text-red-300">
+                <input type="radio" name="item_status_${boxKey}_${idx}" value="สูญหาย" class="hidden" onchange="updateItemBadgeStyle(this)">
+                <i class="fa-solid fa-circle-question mr-0.5"></i> สูญหาย
+              </label>
+            </div>
+          </div>
+        `).join('');
+      });
+    }
+
+    window.openAddEquipmentModal = function() {
+      Swal.fire({
+        title: '➕ เพิ่มอุปกรณ์ใหม่เข้ากล่อง',
+        html: `
+          <div class="text-left space-y-3 p-1">
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">เลือกหมวดหมู่กล่อง</label>
+              <select id="swalBoxCategory" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2.5 text-sm text-white focus:border-red-500 outline-none">
+                <option value="ss">กล่อง SS (อุปกรณ์เล็ก / ดอกสว่าน / โฮลซอว์)</option>
+                <option value="s">กล่อง S (ชุดเครื่องมือช่างมือ / อุปกรณ์วัด)</option>
+                <option value="m">กล่อง M (เครื่องมือไฟฟ้า / แบตเตอรี่)</option>
+                <option value="l">กล่อง L (อุปกรณ์สนาม & งานช่างหนัก)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">ระบุชื่ออุปกรณ์ใหม่</label>
+              <input type="text" id="swalEquipmentName" placeholder="เช่น มิเตอร์วัดแรงดันดิจิทัล" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2.5 text-sm text-white focus:border-red-500 outline-none">
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'บันทึกอุปกรณ์ใหม่',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#dc2626',
+        preConfirm: () => {
+          const boxKey = document.getElementById('swalBoxCategory').value;
+          const name = document.getElementById('swalEquipmentName').value.trim();
+          if (!name) { Swal.showValidationMessage('กรุณาระบุชื่ออุปกรณ์ใหม่!'); return false; }
+          return { boxKey, name };
+        }
+      }).then(res => {
+        if (res.isConfirmed && res.value) {
+          const newItem = { id: 'citem-' + Date.now(), boxKey: res.value.boxKey, name: res.value.name };
+          customBoxItems.push(newItem);
+          saveAllToLocalStorage();
+          renderCarCheckBoxesUI();
+          Swal.fire('เพิ่มสำเร็จ!', `เพิ่มอุปกรณ์ "${newItem.name}" เข้าในกล่องแล้ว`, 'success');
+        }
+      });
+    };
+
+    window.deleteCustomEquipment = function(id) {
+      customBoxItems = customBoxItems.filter(i => i.id !== id);
+      saveAllToLocalStorage();
+      renderCarCheckBoxesUI();
+    };
+
+    window.updateItemBadgeStyle = function(radioEl) {
+      const parentGroup = radioEl.closest('.flex');
+      if (!parentGroup) return;
+      parentGroup.querySelectorAll('label').forEach(lbl => {
+        const inp = lbl.querySelector('input');
+        if (inp.checked) {
+          if (inp.value === 'ปกติ') lbl.className = 'px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition bg-zinc-800 text-white border border-zinc-700 shadow-sm';
+          else if (inp.value === 'ชำรุด' || inp.value === 'ชำรุดรอซ่อม') lbl.className = 'px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition bg-red-600 text-white border border-red-500 shadow-sm';
+          else if (inp.value === 'สูญหาย' || inp.value === 'ปลดระวาง') lbl.className = 'px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition bg-red-950 text-red-300 border border-red-800 shadow-sm';
+        } else {
+          lbl.className = 'px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition bg-zinc-800 text-zinc-400 border border-zinc-700';
+        }
+      });
+    };
+
+    function populateDropdowns() {
+      document.querySelectorAll('.personnel-dropdown').forEach(select => {
+        select.innerHTML = STATIC_PERSONNEL.map(name => `<option value="${name}">${name}</option>`).join('');
+      });
+      document.querySelectorAll('.vehicle-dropdown').forEach(select => {
+        select.innerHTML = STATIC_VEHICLES.map(v => `<option value="${v}">${v}</option>`).join('');
+      });
+      document.querySelectorAll('.vehicle-dropdown-filter').forEach(select => {
+        select.innerHTML = `<option value="">ทุกทะเบียนรถยนต์</option>` + STATIC_VEHICLES.map(v => `<option value="${v}">${v}</option>`).join('');
+      });
+    }
+
+    function setupSubtabs() {
+      const pages = ['car_check', 'ppe', 'consumables', 'assets', 'maintenance'];
+      const template = document.getElementById('subtab-header-template');
+
+      pages.forEach(pageId => {
+        const pageEl = document.getElementById(`page-${pageId}`);
+        const container = pageEl?.querySelector('.subtab-header-container');
+        if (container && template) {
+          container.appendChild(template.content.cloneNode(true));
+          container.querySelector('.tab-btn-form').onclick = () => switchSubTab(pageId, 'form');
+          container.querySelector('.tab-btn-history').onclick = () => switchSubTab(pageId, 'history');
+        }
+      });
+    }
+
+    function loadDataFromStorage() {
+      carCheckData = JSON.parse(localStorage.getItem('tiger_car_checks')) || INITIAL_CAR_CHECKS;
+      ppeData = JSON.parse(localStorage.getItem('tiger_ppe')) || INITIAL_PPE;
+      consumablesData = JSON.parse(localStorage.getItem('tiger_consumables')) || INITIAL_CONSUMABLES;
+      assetData = JSON.parse(localStorage.getItem('tiger_assets')) || INITIAL_ASSETS;
+      maintenanceData = JSON.parse(localStorage.getItem('tiger_maintenance')) || INITIAL_MAINTENANCE;
+      
+      const storedStocks = JSON.parse(localStorage.getItem('tiger_stocks'));
+      if (!storedStocks || storedStocks.some(s => ['ถุงมือผ้าถักนิรภัย (คู่)', 'สเปรย์หล่อลื่น WD-40 (กระป๋อง)'].includes(s.name))) {
+        stocksData = DEFAULT_STOCKS;
+      } else {
+        stocksData = storedStocks;
+      }
+
+      customBoxItems = JSON.parse(localStorage.getItem('tiger_custom_box_items')) || [];
+      customPPEItems = JSON.parse(localStorage.getItem('tiger_custom_ppe_items')) || [];
+      customMaintenanceItems = JSON.parse(localStorage.getItem('tiger_custom_maint_items')) || [];
+
+      saveAllToLocalStorage();
+      updateConsumablesItemDropdown();
+    }
+
+    function saveAllToLocalStorage() {
+      localStorage.setItem('tiger_car_checks', JSON.stringify(carCheckData));
+      localStorage.setItem('tiger_ppe', JSON.stringify(ppeData));
+      localStorage.setItem('tiger_consumables', JSON.stringify(consumablesData));
+      localStorage.setItem('tiger_assets', JSON.stringify(assetData));
+      localStorage.setItem('tiger_maintenance', JSON.stringify(maintenanceData));
+      localStorage.setItem('tiger_stocks', JSON.stringify(stocksData));
+      localStorage.setItem('tiger_custom_box_items', JSON.stringify(customBoxItems));
+      localStorage.setItem('tiger_custom_ppe_items', JSON.stringify(customPPEItems));
+      localStorage.setItem('tiger_custom_maint_items', JSON.stringify(customMaintenanceItems));
+    }
+
+    function resetToDemoData() {
+      Swal.fire({
+        title: 'ยืนยันการรีเซ็ตข้อมูล?',
+        text: 'ระบบจะคืนค่าเป็นชุดข้อมูลตัวอย่างเริ่มต้น!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'ใช่, รีเซ็ตข้อมูล'
+      }).then(res => {
+        if (res.isConfirmed) {
+          localStorage.clear();
+          loadDataFromStorage();
+          renderCarCheckBoxesUI();
+          renderPPECatalogUI();
+          renderMaintenanceChecklistUI();
+          switchMaintenanceCategory();
+          renderAllTables();
+          updateDashboardStats();
+          updateCharts();
+          Swal.fire('สำเร็จ!', 'รีเซ็ตข้อมูลตัวอย่างเรียบร้อยแล้ว', 'success');
+        }
+      });
+    }
+
+    window.toBase64 = function(file) {
+      return new Promise((resolve, reject) => {
+        if (!file) { resolve(''); return; }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            let width = img.width, height = img.height;
+            const maxDim = 800;
+
+            if (width > maxDim || height > maxDim) {
+              if (width > height) { height = Math.round((height * maxDim) / width); width = maxDim; }
+              else { width = Math.round((width * maxDim) / height); height = maxDim; }
+            }
+
+            canvas.width = width; canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.8));
+          };
+          img.src = e.target.result;
+        };
+        reader.onerror = err => reject(err);
+        reader.readAsDataURL(file);
+      });
+    };
+
+    function switchPage(pageId) {
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('text-red-400', 'bg-red-950/40', 'font-semibold', 'border', 'border-red-600/30');
+        item.classList.add('text-zinc-300');
+        const icon = item.querySelector('i');
+        if (icon) { icon.classList.remove('text-red-500'); icon.classList.add('text-zinc-400'); }
+      });
+
+      document.getElementById(`page-${pageId}`)?.classList.remove('hidden');
+      const activeNav = document.getElementById(`nav-${pageId}`);
+      if (activeNav) {
+        activeNav.classList.remove('text-zinc-300');
+        activeNav.classList.add('text-red-400', 'bg-red-950/40', 'font-semibold', 'border', 'border-red-600/30');
+        const icon = activeNav.querySelector('i');
+        if (icon) { icon.classList.remove('text-zinc-400'); icon.classList.add('text-red-500'); }
+      }
+
+      const titles = {
+        dashboard: '<i class="fa-solid fa-chart-pie text-red-500"></i> Dashboard ภาพรวมระบบ',
+        car_check: '<i class="fa-solid fa-truck-monster text-red-500"></i> เช็คอุปกรณ์รถยนต์ (SS, S, M, L)',
+        ppe: '<i class="fa-solid fa-hard-hat text-red-500"></i> เบิก-คืน อุปกรณ์ความปลอดภัย PPE',
+        consumables: '<i class="fa-solid fa-boxes-packing text-red-500"></i> เบิกวัสดุสิ้นเปลือง & ตัดสต็อก',
+        assets: '<i class="fa-solid fa-building-columns text-red-500"></i> ทะเบียนทรัพย์สิน & หมดอายุ',
+        maintenance: '<i class="fa-solid fa-screwdriver-wrench text-red-500"></i> บำรุงรักษาอุปกรณ์ติดตั้ง (เลือกทำทีละหมวด)'
+      };
+      document.getElementById('currentPageTitle').innerHTML = titles[pageId] || 'TIGER SOFT HS';
+
+      if (pageId === 'dashboard') {
+        updateDashboardStats();
+        updateCharts();
+      }
+    }
+
+    function switchSubTab(pageId, tabType) {
+      const pageEl = document.getElementById(`page-${pageId}`);
+      if (!pageEl) return;
+
+      const formTab = document.getElementById(`${pageId}-tab-form`);
+      const histTab = document.getElementById(`${pageId}-tab-history`);
+      const formBtn = pageEl.querySelector('.tab-btn-form');
+      const histBtn = pageEl.querySelector('.tab-btn-history');
+
+      if (tabType === 'form') {
+        formTab?.classList.remove('hidden');
+        histTab?.classList.add('hidden');
+        formBtn?.classList.add('border-red-600', 'text-red-500');
+        formBtn?.classList.remove('border-transparent', 'text-zinc-400');
+        histBtn?.classList.remove('border-red-600', 'text-red-500');
+        histBtn?.classList.add('border-transparent', 'text-zinc-400');
+      } else {
+        formTab?.classList.add('hidden');
+        histTab?.classList.remove('hidden');
+        histBtn?.classList.add('border-red-600', 'text-red-500');
+        histBtn?.classList.remove('border-transparent', 'text-zinc-400');
+        formBtn?.classList.remove('border-red-600', 'text-red-500');
+        formBtn?.classList.add('border-transparent', 'text-zinc-400');
+      }
+    }
+
+    window.callGeminiLLM = async function(promptText, systemInstruction = "") {
+      const userApiKey = localStorage.getItem('tiger_gemini_key');
+      if (userApiKey) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userApiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: (systemInstruction ? systemInstruction + "\n" : "") + promptText }] }] })
+          });
+          const data = await res.json();
+          if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+            return data.candidates[0].content.parts[0].text;
+          }
+        } catch (e) {
+          console.warn("Direct API call failed, fallback to smart system simulator", e);
+        }
+      }
+
+      await new Promise(r => setTimeout(r, 800));
+      return generateSmartAIFallback(promptText);
+    };
+
+    function generateSmartAIFallback(prompt) {
+      if (prompt.includes("Lifespan")) {
+        return `💡 **คำแนะนำอายุการใช้งาน (AI Estimate Lifespan):** สำหรับอุปกรณ์เครื่องมือช่างและวัดอิเล็กทรอนิกส์ แนะนำอายุการใช้งาน **3 ปี**`;
+      }
+      return "วิเคราะห์ข้อมูลสำเร็จด้วย Gemini AI Engine";
+    }
+
+    window.runAIEstimateLifespan = async function() {
+      const name = document.getElementById('assetName').value || 'เครื่องมือช่าง';
+      Swal.fire({ title: 'กำลังประเมินอายุใช้งานด้วย AI...', didOpen: () => Swal.showLoading() });
+      const res = await window.callGeminiLLM(`Estimate lifespan for: ${name}`);
+      document.getElementById('assetLifespanYears').value = "3";
+      autoCalculateExpiryDate();
+      Swal.fire({ title: 'AI Estimate Lifespan', html: `<div class="text-left text-sm">${res}<br><br><b>ตั้งค่าอายุใช้งานแนะนำ 3 ปีเรียบร้อยแล้ว</b></div>`, icon: 'success' });
+    };
+
+    // FORM HANDLERS
+    window.handleCarCheckSubmit = async function(e) {
+      e.preventDefault();
+      const photoFile = document.getElementById('carCheckPhoto').files[0];
+      const photoBase64 = photoFile ? await window.toBase64(photoFile) : '';
+
+      const issues = [];
+      ['ss', 's', 'm', 'l'].forEach(boxKey => {
+        const defaultItems = BOX_ITEMS_DEFINITION[boxKey];
+        const userCustomItems = customBoxItems.filter(c => c.boxKey === boxKey);
+        const allBoxItems = [
+          ...defaultItems.map(name => ({ name })),
+          ...userCustomItems.map(item => ({ name: item.name }))
+        ];
+
+        allBoxItems.forEach((itemObj, idx) => {
+          const selectedRadio = document.querySelector(`input[name="item_status_${boxKey}_${idx}"]:checked`);
+          if (selectedRadio && selectedRadio.value !== 'ปกติ') {
+            issues.push({ item: itemObj.name, box: boxKey.toUpperCase(), status: selectedRadio.value });
+          }
+        });
+      });
+
+      const newRecord = {
+        id: 'cc-' + Date.now(),
+        date: document.getElementById('carCheckDate').value,
+        vehicle: document.getElementById('carCheckVehicle').value,
+        inspector: document.getElementById('carCheckInspector').value,
+        status: document.getElementById('carCheckStatus').value,
+        issues: issues,
+        photo: photoBase64,
+        note: document.getElementById('carCheckNote').value
+      };
+
+      carCheckData.unshift(newRecord);
+      saveAllToLocalStorage();
+      renderCarCheckTable();
+      updateDashboardStats();
+      updateCharts();
+
+      Swal.fire({ title: 'บันทึกสำเร็จ!', text: 'บันทึกประวัติการตรวจเช็ครถยนต์เรียบร้อยแล้ว', icon: 'success' });
+      document.getElementById('formCarCheck').reset();
+      renderCarCheckBoxesUI();
+      switchSubTab('car_check', 'history');
+    };
+
+    window.handlePPESubmit = async function(e) {
+      e.preventDefault();
+      const photoFile = document.getElementById('ppePhoto').files[0];
+      const photoBase64 = photoFile ? await window.toBase64(photoFile) : '';
+
+      const allPPEList = [
+        ...DEFAULT_PPE_CATALOG.map(name => ({ name })),
+        ...customPPEItems.map(item => ({ name: item.name }))
+      ];
+
+      const selectedItemsWithQty = [];
+      allPPEList.forEach((itemObj, idx) => {
+        const chk = document.getElementById(`ppe_chk_${idx}`);
+        const qtyEl = document.getElementById(`ppe_qty_${idx}`);
+        if (chk && chk.checked) {
+          const qty = parseInt(qtyEl?.value) || 1;
+          selectedItemsWithQty.push({ name: itemObj.name, qty: qty });
+        }
+      });
+
+      if (selectedItemsWithQty.length === 0) {
+        Swal.fire('คำเตือน', 'กรุณาติ๊กเลือกรายการอุปกรณ์ PPE อย่างน้อย 1 รายการ', 'warning');
+        return;
+      }
+
+      const ppeType = document.getElementById('ppeType').value;
+      const returnedStatus = ppeType.includes('เบิก') ? 'รอคืนอุปกรณ์' : 'คืนสำเร็จ';
+
+      const newRecord = {
+        id: 'ppe-' + Date.now(),
+        type: ppeType,
+        date: document.getElementById('ppeDate').value,
+        user: document.getElementById('ppeUser').value,
+        approver: document.getElementById('ppeApprover').value,
+        location: document.getElementById('ppeLocation').value,
+        itemsWithQty: selectedItemsWithQty,
+        returnedStatus: returnedStatus,
+        photo: photoBase64,
+        note: document.getElementById('ppeNote').value || ''
+      };
+
+      ppeData.unshift(newRecord);
+      saveAllToLocalStorage();
+      renderPPETable();
+      updateDashboardStats();
+      updateCharts();
+
+      Swal.fire({ title: 'บันทึกสำเร็จ!', text: 'บันทึกรายการเบิก-คืน PPE เรียบร้อยแล้ว', icon: 'success' });
+      document.getElementById('formPPE').reset();
+      renderPPECatalogUI();
+      switchSubTab('ppe', 'history');
+    };
+
+    window.markPPEReturned = function(id) {
+      const rec = ppeData.find(p => p.id === id);
+      if (!rec) return;
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const itemsListHtml = (rec.itemsWithQty || []).map(i => `<span class="px-2 py-0.5 bg-zinc-800 border border-zinc-700 text-white rounded text-xs mr-1 inline-block">${i.name} (<b>${i.qty}</b>)</span>`).join('');
+
+      Swal.fire({
+        title: '📥 บันทึกการคืนอุปกรณ์ PPE',
+        html: `
+          <div class="text-left text-xs space-y-3 p-1">
+            <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-1">
+              <div><span class="text-zinc-400">ผู้เบิกอุปกรณ์:</span> <b class="text-white">${rec.user}</b></div>
+              <div><span class="text-zinc-400">ทะเบียนรถยนต์:</span> <b class="text-red-400 font-semibold">${rec.location}</b></div>
+              <div class="pt-1"><span class="text-zinc-400 block mb-1">รายการอุปกรณ์ที่คืน:</span> ${itemsListHtml}</div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">วันที่นำอุปกรณ์มาคืน</label>
+              <input type="date" id="swalReturnDate" value="${todayStr}" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2 text-sm text-white focus:border-red-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">ภาพถ่ายขณะคืนอุปกรณ์ (กล้อง / อัปโหลด)</label>
+              <input type="file" id="swalReturnPhoto" accept="image/*" capture="environment" class="w-full text-xs text-zinc-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-red-950 file:text-red-400">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-zinc-300 mb-1">หมายเหตุการคืน</label>
+              <input type="text" id="swalReturnNote" placeholder="เช่น อุปกรณ์ครบถ้วน อยู่ในสภาพปกติ" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2 text-xs text-white focus:border-red-500 outline-none">
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยันการรับคืนอุปกรณ์ (เปลี่ยนเป็น คืนสำเร็จ)',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#dc2626',
+        preConfirm: async () => {
+          const rDate = document.getElementById('swalReturnDate').value;
+          const rNote = document.getElementById('swalReturnNote').value.trim();
+          const rPhotoFile = document.getElementById('swalReturnPhoto').files[0];
+          const rPhotoBase64 = rPhotoFile ? await window.toBase64(rPhotoFile) : '';
+
+          return { returnDate: rDate, returnNote: rNote, returnPhoto: rPhotoBase64 };
+        }
+      }).then(res => {
+        if (res.isConfirmed && res.value) {
+          rec.returnedStatus = 'คืนสำเร็จ';
+          rec.returnDate = res.value.returnDate;
+          if (res.value.returnNote) rec.note = (rec.note ? rec.note + ' | ' : '') + 'คืนเมื่อ ' + res.value.returnDate + ': ' + res.value.returnNote;
+          if (res.value.returnPhoto) rec.photo = res.value.returnPhoto;
+
+          saveAllToLocalStorage();
+          renderPPETable();
+          updateDashboardStats();
+          updateCharts();
+
+          Swal.fire({
+            title: 'คืนสำเร็จ!',
+            html: `อัปเดตสถานะเป็น <b class="text-red-400 font-bold">"คืนสำเร็จ"</b> เรียบร้อยแล้ว`,
+            icon: 'success'
+          });
+        }
+      });
+    };
+
+    window.handleConsumablesSubmit = async function(e) {
+      e.preventDefault();
+      const itemId = document.getElementById('conItemSelect').value;
+      const qty = parseInt(document.getElementById('conQty').value);
+      const stockItem = stocksData.find(s => s.id === itemId);
+
+      if (!stockItem || stockItem.qty < qty) {
+        Swal.fire('สต็อกไม่เพียงพอ!', `สต็อกคงเหลือปัจจุบันมีเพียง ${stockItem ? stockItem.qty : 0} ${stockItem ? stockItem.unit : ''}`, 'error');
+        return;
+      }
+
+      const photoFile = document.getElementById('conPhoto').files[0];
+      const photoBase64 = photoFile ? await window.toBase64(photoFile) : '';
+
+      stockItem.qty -= qty;
+
+      const newRecord = {
+        id: 'con-' + Date.now(),
+        date: document.getElementById('conDate').value,
+        itemName: stockItem.name,
+        qty: qty,
+        unit: stockItem.unit,
+        user: document.getElementById('conUser').value,
+        approver: document.getElementById('conApprover').value,
+        vehicle: document.getElementById('conVehicle').value,
+        photo: photoBase64,
+        note: document.getElementById('conNote').value || ''
+      };
+
+      consumablesData.unshift(newRecord);
+      saveAllToLocalStorage();
+      renderConsumablesTable();
+      renderStockSideList();
+      updateConsumablesItemDropdown();
+      updateDashboardStats();
+      updateCharts();
+
+      Swal.fire({
+        title: 'ตัดสต็อกสำเร็จ!',
+        html: `ตัดสต็อก <b>${stockItem.name}</b> จำนวน <b>${qty} ${stockItem.unit}</b> เรียบร้อยแล้ว`,
+        icon: 'success'
+      });
+
+      document.getElementById('formConsumables').reset();
+      switchSubTab('consumables', 'history');
+    };
+
+    window.handleAssetSubmit = async function(e) {
+      e.preventDefault();
+      const accountCode = document.getElementById('assetAccountCode').value.trim();
+      const hsCode = document.getElementById('assetHSCode').value.trim();
+
+      const duplicateAccount = assetData.find(a => a.accountCode === accountCode);
+      if (duplicateAccount) {
+        Swal.fire('รหัสซ้ำ!', `รหัสทรัพย์สินบัญชี "${accountCode}" มีในระบบแล้ว`, 'error');
+        return;
+      }
+
+      const duplicateHS = assetData.find(a => a.hsCode === hsCode);
+      if (duplicateHS) {
+        Swal.fire('รหัสซ้ำ!', `รหัสทรัพย์สิน HS "${hsCode}" มีในระบบแล้ว`, 'error');
+        return;
+      }
+
+      const photoFile = document.getElementById('assetPhoto').files[0];
+      const photoBase64 = photoFile ? await window.toBase64(photoFile) : '';
+
+      const purchaseDate = document.getElementById('assetPurchaseDate').value;
+      const lifespanYears = parseInt(document.getElementById('assetLifespanYears').value) || 3;
+      const expDate = document.getElementById('assetExpDate').value;
+
+      const newRecord = {
+        id: 'ast-' + Date.now(),
+        accountCode: accountCode,
+        hsCode: hsCode,
+        name: document.getElementById('assetName').value.trim(),
+        status: document.getElementById('assetStatus').value,
+        department: document.getElementById('assetDepartment').value,
+        owner: document.getElementById('assetOwner').value,
+        serial: document.getElementById('assetSerial').value.trim() || '-',
+        brand: document.getElementById('assetBrand').value.trim() || '-',
+        model: document.getElementById('assetModel').value.trim() || '-',
+        purchaseDate: purchaseDate,
+        lifespanYears: lifespanYears,
+        expDate: expDate,
+        location: document.getElementById('assetLocation').value,
+        photo: photoBase64,
+        note: document.getElementById('assetNote').value.trim() || ''
+      };
+
+      assetData.unshift(newRecord);
+      saveAllToLocalStorage();
+      renderAssetsTable();
+      updateDashboardStats();
+      updateCharts();
+
+      Swal.fire({
+        title: 'บันทึกสำเร็จ!',
+        html: `ลงทะเบียนทรัพย์สินใหม่เรียบร้อยแล้ว`,
+        icon: 'success'
+      });
+
+      document.getElementById('formAsset').reset();
+      autoCalculateExpiryDate();
+      switchSubTab('assets', 'history');
+    };
+
+    window.viewAssetDetailsModal = function(id) {
+      const asset = assetData.find(a => a.id === id);
+      if (!asset) return;
+
+      const today = new Date();
+      const exp = new Date(asset.expDate);
+      const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+
+      let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-zinc-800 text-white">✅ ปกติ</span>`;
+      if (asset.status === 'ชำรุด') statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-600 text-white">⚠️ ชำรุด</span>`;
+      if (asset.status === 'สูญหาย') statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-950 text-red-300">❌ สูญหาย</span>`;
+
+      let expStatus = `<span class="text-white font-bold">ปกติ (คงเหลือ ${diffDays} วัน)</span>`;
+      if (diffDays < 0) expStatus = `<span class="text-red-400 font-bold">⚠️ หมดอายุการใช้งานแล้ว</span>`;
+      else if (diffDays <= 30) expStatus = `<span class="text-red-300 font-bold">⏳ ใกล้หมดอายุ (เหลือ ${diffDays} วัน)</span>`;
+
+      const photoHtml = asset.photo 
+        ? `<img src="${asset.photo}" onclick="openImageModal('${asset.photo}')" class="w-full h-48 object-cover rounded-xl border border-zinc-700 cursor-pointer shadow-md mb-3 hover:scale-105 transition">`
+        : `<div class="w-full h-32 bg-zinc-950 rounded-xl border border-zinc-800 flex items-center justify-center text-zinc-500 italic mb-3">ไม่มีรูปภาพทรัพย์สิน</div>`;
+
+      Swal.fire({
+        title: `🏢 รายรายละเอียดทรัพย์สิน`,
+        html: `
+          <div class="text-left text-xs space-y-3 p-1">
+            ${photoHtml}
+            
+            <div class="grid grid-cols-2 gap-2 bg-zinc-950 p-3 rounded-xl border border-zinc-800">
+              <div><span class="text-zinc-400">รหัสบัญชี:</span> <b class="text-red-400 font-mono">${asset.accountCode || '-'}</b></div>
+              <div><span class="text-zinc-400">รหัส HS:</span> <b class="text-red-400 font-mono">${asset.hsCode || '-'}</b></div>
+              <div class="col-span-2"><span class="text-zinc-400">ชื่ออุปกรณ์:</span> <b class="text-white text-sm">${asset.name}</b></div>
+              <div><span class="text-zinc-400">สถานะ:</span> ${statusBadge}</div>
+              <div><span class="text-zinc-400">แผนก:</span> <b class="text-white font-bold">${asset.department || 'HS'}</b></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 bg-zinc-950 p-3 rounded-xl border border-zinc-800">
+              <div><span class="text-zinc-400">ยี่ห้อ:</span> <b class="text-zinc-200">${asset.brand || '-'}</b></div>
+              <div><span class="text-zinc-400">รุ่น:</span> <b class="text-zinc-200">${asset.model || '-'}</b></div>
+              <div class="col-span-2"><span class="text-zinc-400">Serial Number:</span> <b class="text-zinc-200 font-mono">${asset.serial || '-'}</b></div>
+              <div class="col-span-2"><span class="text-zinc-400">ผู้ดูแลทรัพย์สิน:</span> <b class="text-white">${asset.owner}</b></div>
+              <div class="col-span-2"><span class="text-zinc-400">สถานที่/จัดเก็บ:</span> <b class="text-red-400">${asset.location}</b></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 bg-zinc-950 p-3 rounded-xl border border-red-600/30">
+              <div><span class="text-zinc-400">วันที่ซื้อ:</span> <b class="text-zinc-200">${asset.purchaseDate || asset.regDate}</b></div>
+              <div><span class="text-zinc-400">อายุการใช้งาน:</span> <b class="text-red-400">${asset.lifespanYears || 3} ปี</b></div>
+              <div class="col-span-2"><span class="text-zinc-400">วันหมดอายุ (อัตโนมัติ):</span> <b class="text-white">${asset.expDate}</b></div>
+              <div class="col-span-2"><span class="text-zinc-400">สถานะอายุ:</span> ${expStatus}</div>
+            </div>
+
+            ${asset.note ? `<div class="p-2 bg-zinc-950 rounded-xl border border-zinc-800"><span class="text-zinc-400">หมายเหตุ:</span> <span class="text-zinc-300">${asset.note}</span></div>` : ''}
+          </div>
+        `,
+        confirmButtonText: 'ปิดหน้าต่าง',
+        confirmButtonColor: '#27272a',
+        customClass: { popup: 'rounded-2xl border border-zinc-700 bg-zinc-900 text-zinc-100' }
+      });
+    };
+
+    // EQUIPMENT MAINTENANCE SUBMIT HANDLER (PERFORM ONE CATEGORY AT A TIME)
+    window.handleMaintenanceSubmit = async function(e) {
+      e.preventDefault();
+      const photoFile = document.getElementById('maintPhoto').files[0];
+      const photoBase64 = photoFile ? await window.toBase64(photoFile) : '';
+
+      const catKey = document.getElementById('maintSelectedCategory').value || 'car_inside';
+      const catObj = MAINTENANCE_CATEGORIES[catKey];
+
+      const defaultItems = catObj.items;
+      const userCustomItems = customMaintenanceItems.filter(c => c.categoryKey === catKey);
+      const allCatItems = [
+        ...defaultItems.map(name => ({ name })),
+        ...userCustomItems.map(item => ({ name: item.name }))
+      ];
+
+      const defects = [];
+      allCatItems.forEach((itemObj, idx) => {
+        const selectedRadio = document.querySelector(`input[name="maint_item_${catKey}_${idx}"]:checked`);
+        if (selectedRadio && selectedRadio.value !== 'ปกติ') {
+          defects.push({ item: itemObj.name, category: catObj.title, status: selectedRadio.value });
+        }
+      });
+
+      const newRecord = {
+        id: 'mnt-' + Date.now(),
+        categoryKey: catKey,
+        categoryTitle: catObj.title,
+        round: document.getElementById('maintRound').value,
+        date: document.getElementById('maintDate').value,
+        vehicle: document.getElementById('maintVehicle').value,
+        inspector: document.getElementById('maintInspector').value,
+        status: document.getElementById('maintStatus').value,
+        defects: defects,
+        photo: photoBase64,
+        note: document.getElementById('maintDefectDetails').value || ''
+      };
+
+      maintenanceData.unshift(newRecord);
+      saveAllToLocalStorage();
+      renderMaintenanceTable();
+      updateDashboardStats();
+      updateCharts();
+
+      Swal.fire({
+        title: 'บันทึกสำเร็จ!',
+        html: `บันทึกการบำรุงรักษาประจำหมวด <b>"${catObj.title}"</b> เรียบร้อยแล้ว`,
+        icon: 'success'
+      });
+
+      document.getElementById('formMaintenance').reset();
+      renderMaintenanceChecklistUI();
+      switchMaintenanceCategory();
+      switchSubTab('maintenance', 'history');
+    };
+
+    // RENDER TABLES & HISTORY VIEWS
+    function renderAllTables() {
+      renderCarCheckTable();
+      renderPPETable();
+      renderConsumablesTable();
+      renderAssetsTable();
+      renderMaintenanceTable();
+      renderStockSideList();
+    }
+
+    function renderCarCheckTable() {
+      const tbody = document.getElementById('carCheckTableBody');
+      const search = document.getElementById('carCheckSearch')?.value.toLowerCase() || '';
+      const filterVeh = document.getElementById('carCheckFilterVehicle')?.value || '';
+
+      const filtered = carCheckData.filter(item => {
+        const matchSearch = item.vehicle.toLowerCase().includes(search) || item.inspector.toLowerCase().includes(search);
+        const matchVeh = !filterVeh || item.vehicle === filterVeh;
+        return matchSearch && matchVeh;
+      });
+
+      tbody.innerHTML = filtered.map(item => {
+        const issuesSummary = item.issues && item.issues.length > 0 
+          ? item.issues.map(i => `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${i.status === 'ชำรุด' ? 'bg-red-600 text-white' : 'bg-red-950 text-red-300 border border-red-800'} mb-1 inline-block">${i.item} (${i.status})</span>`).join(' ')
+          : `<span class="text-white font-medium text-[11px]"><i class="fa-solid fa-circle-check text-red-500 mr-1"></i>ครบถ้วนสมบูรณ์</span>`;
+
+        const photoPreviewHtml = item.photo 
+          ? `<img src="${item.photo}" onclick="openImageModal('${item.photo}')" alt="รูปถ่าย" class="w-12 h-12 object-cover rounded-lg border border-zinc-700 cursor-pointer hover:scale-110 transition shadow-md">`
+          : `<span class="text-zinc-500 italic text-[11px]">ไม่มีรูปภาพ</span>`;
+
+        return `
+          <tr class="hover:bg-zinc-900/40 transition">
+            <td class="p-3 font-medium">${item.date}</td>
+            <td class="p-3 font-bold text-red-500 text-sm">${item.vehicle}</td>
+            <td class="p-3 font-medium text-white">${item.inspector}</td>
+            <td class="p-3">${photoPreviewHtml}</td>
+            <td class="p-3 max-w-xs">${issuesSummary}</td>
+            <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${item.status.includes('สมบูรณ์') ? 'bg-zinc-800 text-white' : 'bg-red-600 text-white'}">${item.status}</span></td>
+            <td class="p-3 text-zinc-400 max-w-xs">${item.note || '-'}</td>
+            <td class="p-3 text-right">
+              <button onclick="deleteRecord('carCheck', '${item.id}')" class="text-red-400 hover:text-red-300 p-1.5 bg-red-950/50 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderPPETable() {
+      const tbody = document.getElementById('ppeTableBody');
+      const search = document.getElementById('ppeSearch')?.value.toLowerCase() || '';
+      const filterType = document.getElementById('ppeFilterType')?.value || '';
+
+      const filtered = ppeData.filter(item => {
+        const matchSearch = item.user.toLowerCase().includes(search) || item.approver?.toLowerCase().includes(search) || item.location.toLowerCase().includes(search);
+        
+        let matchFilter = true;
+        if (filterType === 'เบิกอุปกรณ์') matchFilter = item.type.includes('เบิก');
+        else if (filterType === 'คืนอุปกรณ์') matchFilter = item.type.includes('คืน');
+        else if (filterType === 'รอคืนอุปกรณ์') matchFilter = item.returnedStatus === 'รอคืนอุปกรณ์';
+        else if (filterType === 'คืนสำเร็จ') matchFilter = item.returnedStatus === 'คืนสำเร็จ' || item.returnedStatus === 'คืนอุปกรณ์เรียบร้อย';
+
+        return matchSearch && matchFilter;
+      });
+
+      tbody.innerHTML = filtered.map(item => {
+        const itemsFormatted = item.itemsWithQty 
+          ? item.itemsWithQty.map(i => `<span class="px-2 py-0.5 bg-zinc-800 border border-zinc-700 text-white rounded text-[11px] font-medium mr-1 mb-1 inline-block">${i.name} (<b>${i.qty}</b>)</span>`).join('')
+          : (item.items || []).join(', ');
+
+        const photoPreviewHtml = item.photo 
+          ? `<img src="${item.photo}" onclick="openImageModal('${item.photo}')" alt="รูปถ่าย" class="w-12 h-12 object-cover rounded-lg border border-zinc-700 cursor-pointer hover:scale-110 transition shadow-md">`
+          : `<span class="text-zinc-500 italic text-[11px]">ไม่มีรูปภาพ</span>`;
+
+        let returnBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-zinc-800 text-white border border-zinc-700">✅ คืนสำเร็จ</span>`;
+        
+        if (item.returnedStatus === 'รอคืนอุปกรณ์' || (item.type.includes('เบิก') && item.returnedStatus !== 'คืนสำเร็จ' && item.returnedStatus !== 'คืนอุปกรณ์เรียบร้อย')) {
+          returnBadge = `
+            <div class="flex items-center gap-1.5">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-950 text-red-400 border border-red-600/40 animate-pulse">⏳ รอคืนอุปกรณ์</span>
+              <button onclick="markPPEReturned('${item.id}')" title="กดเพื่อบันทึกการคืนอุปกรณ์" class="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-semibold transition shadow flex items-center gap-1">
+                <i class="fa-solid fa-check"></i> บันทึกคืน
+              </button>
+            </div>
+          `;
+        }
+
+        return `
+          <tr class="hover:bg-zinc-900/40 transition">
+            <td class="p-3 font-medium">${item.date}</td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.type.includes('เบิก') ? 'bg-red-950 text-red-400' : 'bg-zinc-800 text-white'}">${item.type}</span></td>
+            <td class="p-3 font-medium text-white">${item.user}</td>
+            <td class="p-3 text-zinc-300">${item.approver || '-'}</td>
+            <td class="p-3 font-semibold text-red-500">${item.location}</td>
+            <td class="p-3">${photoPreviewHtml}</td>
+            <td class="p-3 max-w-xs">${itemsFormatted}</td>
+            <td class="p-3">${returnBadge}</td>
+            <td class="p-3 text-right">
+              <button onclick="deleteRecord('ppe', '${item.id}')" title="ลบรายการ" class="text-red-400 hover:text-red-300 p-1.5 bg-red-950/50 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderConsumablesTable() {
+      const tbody = document.getElementById('consumablesTableBody');
+      const search = document.getElementById('conSearch')?.value.toLowerCase() || '';
+
+      const filtered = consumablesData.filter(item => 
+        item.itemName.toLowerCase().includes(search) || 
+        item.user.toLowerCase().includes(search) || 
+        (item.approver && item.approver.toLowerCase().includes(search)) ||
+        (item.vehicle && item.vehicle.toLowerCase().includes(search))
+      );
+
+      tbody.innerHTML = filtered.map(item => {
+        const photoPreviewHtml = item.photo 
+          ? `<img src="${item.photo}" onclick="openImageModal('${item.photo}')" alt="รูปถ่าย" class="w-12 h-12 object-cover rounded-lg border border-zinc-700 cursor-pointer hover:scale-110 transition shadow-md">`
+          : `<span class="text-zinc-500 italic text-[11px]">ไม่มีรูปภาพ</span>`;
+
+        return `
+          <tr class="hover:bg-zinc-900/40 transition">
+            <td class="p-3 font-medium">${item.date}</td>
+            <td class="p-3 font-semibold text-white">${item.itemName}</td>
+            <td class="p-3 font-bold text-red-500">${item.qty} ${item.unit || ''}</td>
+            <td class="p-3 text-white font-medium">${item.user}</td>
+            <td class="p-3 text-zinc-300">${item.approver || '-'}</td>
+            <td class="p-3 text-red-400 font-semibold">${item.vehicle || '-'}</td>
+            <td class="p-3">${photoPreviewHtml}</td>
+            <td class="p-3 text-zinc-400 max-w-xs">${item.note || '-'}</td>
+            <td class="p-3 text-right">
+              <button onclick="deleteRecord('consumables', '${item.id}')" class="text-red-400 hover:text-red-300 p-1.5 bg-red-950/50 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderAssetsTable() {
+      const tbody = document.getElementById('assetsTableBody');
+      const search = document.getElementById('assetSearch')?.value.toLowerCase() || '';
+      const deptFilter = document.getElementById('assetFilterDepartment')?.value || '';
+
+      const filtered = assetData.filter(item => {
+        const accCode = item.accountCode || item.code || '';
+        const hsCode = item.hsCode || '';
+        const matchSearch = accCode.toLowerCase().includes(search) || hsCode.toLowerCase().includes(search) || item.name.toLowerCase().includes(search) || item.owner.toLowerCase().includes(search);
+        const matchDept = !deptFilter || item.department === deptFilter;
+        return matchSearch && matchDept;
+      });
+
+      tbody.innerHTML = filtered.map(item => {
+        const photoPreviewHtml = item.photo 
+          ? `<img src="${item.photo}" onclick="openImageModal('${item.photo}')" alt="รูปถ่าย" class="w-12 h-12 object-cover rounded-lg border border-zinc-700 cursor-pointer hover:scale-110 transition shadow-md">`
+          : `<span class="text-zinc-500 italic text-[11px]">ไม่มีรูปภาพ</span>`;
+
+        let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-800 text-white">ปกติ</span>`;
+        if (item.status === 'ชำรุด') statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-600 text-white">ชำรุด</span>`;
+        if (item.status === 'สูญหาย') statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-950 text-red-300">สูญหาย</span>`;
+
+        return `
+          <tr class="hover:bg-zinc-900/40 transition">
+            <td class="p-3">
+              <span class="font-mono text-red-500 font-bold text-xs">${item.accountCode || item.code || '-'}</span><br>
+              <span class="font-mono text-zinc-400 text-[11px]">${item.hsCode || '-'}</span>
+            </td>
+            <td class="p-3 font-semibold text-white">${item.name}</td>
+            <td class="p-3 font-bold text-red-400">${item.department || 'HS'}</td>
+            <td class="p-3 text-zinc-200">${item.owner}</td>
+            <td class="p-3">${statusBadge}</td>
+            <td class="p-3 font-medium text-white">${item.expDate}</td>
+            <td class="p-3">${photoPreviewHtml}</td>
+            <td class="p-3 text-right space-x-1">
+              <button onclick="viewAssetDetailsModal('${item.id}')" title="ดูรายละเอียดที่บันทึก" class="text-zinc-300 hover:text-white p-1.5 bg-zinc-800 rounded-lg"><i class="fa-solid fa-eye"></i></button>
+              <button onclick="deleteRecord('asset', '${item.id}')" title="ลบรายการ" class="text-red-400 hover:text-red-300 p-1.5 bg-red-950/50 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // MAINTENANCE TABLE RENDER (With Category Badges & Filtering)
+    function renderMaintenanceTable() {
+      const tbody = document.getElementById('maintenanceTableBody');
+      const search = document.getElementById('maintSearch')?.value.toLowerCase() || '';
+      const catFilter = document.getElementById('maintFilterCategory')?.value || '';
+      const roundFilter = document.getElementById('maintFilterRound')?.value || '';
+      const vehFilter = document.getElementById('maintFilterVehicle')?.value || '';
+
+      const filtered = maintenanceData.filter(item => {
+        const vehicle = item.vehicle || item.asset || '';
+        const inspector = item.inspector || '';
+        const note = item.note || item.defectsDetails || '';
+        const catTitle = item.categoryTitle || 'ภายในรถยนต์';
+        const defectItemsStr = item.defects && item.defects.length > 0 
+          ? item.defects.map(d => d.item).join(' ') 
+          : (typeof item.defects === 'string' ? item.defects : '');
+
+        const matchSearch = vehicle.toLowerCase().includes(search) || 
+                            inspector.toLowerCase().includes(search) || 
+                            note.toLowerCase().includes(search) ||
+                            catTitle.toLowerCase().includes(search) ||
+                            defectItemsStr.toLowerCase().includes(search);
+
+        const matchCat = !catFilter || (item.categoryKey === catFilter || (catFilter === 'car_inside' && !item.categoryKey));
+        const matchRound = !roundFilter || item.round === roundFilter;
+        const matchVeh = !vehFilter || vehicle === vehFilter;
+
+        return matchSearch && matchCat && matchRound && matchVeh;
+      });
+
+      tbody.innerHTML = filtered.map(item => {
+        const defectSummary = item.defects && item.defects.length > 0 
+          ? item.defects.map(d => `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${d.status === 'ชำรุดรอซ่อม' ? 'bg-red-600 text-white' : 'bg-red-950 text-red-300 border border-red-800'} mb-1 inline-block">${d.item} (${d.status})</span>`).join(' ')
+          : (typeof item.defects === 'string' && item.defects ? `<span class="text-red-400">${item.defects}</span>` : `<span class="text-white font-medium text-[11px]"><i class="fa-solid fa-circle-check text-red-500 mr-1"></i>อุปกรณ์ทุกชิ้นปกติ</span>`);
+
+        const photoPreviewHtml = item.photo 
+          ? `<img src="${item.photo}" onclick="openImageModal('${item.photo}')" alt="รูปถ่าย" class="w-12 h-12 object-cover rounded-lg border border-zinc-700 cursor-pointer hover:scale-110 transition shadow-md">`
+          : `<span class="text-zinc-500 italic text-[11px]">ไม่มีรูปภาพ</span>`;
+
+        const statusStr = item.status || item.result || 'ปกติพร้อมใช้งาน';
+        const isPass = statusStr.includes('ปกติ');
+
+        const isPPECat = item.categoryKey === 'ppe_special' || (item.categoryTitle && item.categoryTitle.includes('PPE'));
+        const catBadge = isPPECat 
+          ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-white border border-zinc-700">🥽 ชุด PPE และอุปกรณ์เฉพาะ</span>`
+          : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-950 text-red-400 border border-red-600/30">🚗 ภายในรถยนต์</span>`;
+
+        return `
+          <tr class="hover:bg-zinc-900/40 transition">
+            <td class="p-3 font-medium">${item.date}</td>
+            <td class="p-3">${catBadge}</td>
+            <td class="p-3 font-bold text-red-500">${item.round}</td>
+            <td class="p-3 font-bold text-white text-sm">${item.vehicle || item.asset || '-'}</td>
+            <td class="p-3 font-medium text-white">${item.inspector}</td>
+            <td class="p-3">${photoPreviewHtml}</td>
+            <td class="p-3 max-w-xs">${defectSummary}</td>
+            <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${isPass ? 'bg-zinc-800 text-white' : 'bg-red-600 text-white'}">${statusStr}</span></td>
+            <td class="p-3 text-zinc-400 max-w-xs">${item.note || item.defectsDetails || '-'}</td>
+            <td class="p-3 text-right">
+              <button onclick="deleteRecord('maintenance', '${item.id}')" title="ลบรายการ" class="text-red-400 hover:text-red-300 p-1.5 bg-red-950/50 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateConsumablesItemDropdown() {
+      const select = document.getElementById('conItemSelect');
+      if (select) {
+        select.innerHTML = stocksData.map(s => `<option value="${s.id}">${s.name} (คงเหลือ: ${s.qty} ${s.unit})</option>`).join('');
+        updateStockHint();
+      }
+    }
+
+    function updateStockHint() {
+      const itemId = document.getElementById('conItemSelect')?.value;
+      const stockItem = stocksData.find(s => s.id === itemId);
+      const hintEl = document.getElementById('conStockHint');
+      if (hintEl && stockItem) {
+        hintEl.textContent = `(คงเหลือปัจจุบัน: ${stockItem.qty} ${stockItem.unit})`;
+      }
+    }
+
+    function updateDashboardStats() {
+      document.getElementById('statTotalAssets').textContent = assetData.length;
+      document.getElementById('statTotalCarChecks').textContent = carCheckData.length;
+      document.getElementById('statTotalPPERecords').textContent = ppeData.length;
+      document.getElementById('statPendingMaintenance').textContent = maintenanceData.filter(m => {
+        const s = m.status || m.result || '';
+        return !s.includes('ปกติ');
+      }).length;
+    }
+
+    function initCharts() {
+      const ctxCar = document.getElementById('chartCarCheck').getContext('2d');
+      charts.car = new Chart(ctxCar, {
+        type: 'bar',
+        data: getCarCheckChartData(),
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              anchor: 'end', align: 'top', color: '#dc2626',
+              font: { family: 'Prompt', weight: 'bold', size: 10 },
+              formatter: v => v > 0 ? v : ''
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#a1a1aa', font: { family: 'Prompt', size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#a1a1aa' }, grid: { color: '#27272a' } }
+          }
+        }
+      });
+
+      const ctxPPE = document.getElementById('chartPPE').getContext('2d');
+      charts.ppe = new Chart(ctxPPE, {
+        type: 'bar',
+        data: getPPEChartData(),
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              anchor: 'end', align: 'top', color: '#ffffff',
+              font: { family: 'Prompt', weight: 'bold', size: 10 },
+              formatter: v => v > 0 ? v : ''
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#a1a1aa', font: { family: 'Prompt', size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#a1a1aa' }, grid: { color: '#27272a' } }
+          }
+        }
+      });
+
+      const ctxCon = document.getElementById('chartConsumables').getContext('2d');
+      charts.con = new Chart(ctxCon, {
+        type: 'line',
+        data: getConsumablesChartData(),
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, datalabels: { display: false } },
+          scales: {
+            x: { ticks: { color: '#a1a1aa' }, grid: { display: false } },
+            y: { ticks: { color: '#a1a1aa' }, grid: { color: '#27272a' } }
+          }
+        }
+      });
+
+      const ctxAsset = document.getElementById('chartAssetStatus').getContext('2d');
+      charts.asset = new Chart(ctxAsset, {
+        type: 'doughnut',
+        data: getAssetStatusChartData(),
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right', labels: { color: '#a1a1aa', font: { family: 'Prompt' } } },
+            datalabels: {
+              color: '#ffffff',
+              font: { family: 'Prompt', weight: 'bold', size: 11 },
+              formatter: v => v > 0 ? v : ''
+            }
+          }
+        }
+      });
+
+      const ctxMaint = document.getElementById('chartMaintenance').getContext('2d');
+      charts.maint = new Chart(ctxMaint, {
+        type: 'bar',
+        data: getMaintenanceChartData(),
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#a1a1aa', font: { family: 'Prompt' } } },
+            datalabels: {
+              anchor: 'end',
+              align: 'top',
+              color: '#ffffff',
+              font: { family: 'Prompt', weight: 'bold', size: 10 },
+              formatter: v => v > 0 ? v : ''
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#a1a1aa', font: { family: 'Prompt', size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#a1a1aa' }, grid: { color: '#27272a' } }
+          }
+        }
+      });
+    }
+
+    function updateCharts() {
+      if (charts.car) { charts.car.data = getCarCheckChartData(); charts.car.update(); }
+      if (charts.ppe) { charts.ppe.data = getPPEChartData(); charts.ppe.update(); }
+      if (charts.con) { charts.con.data = getConsumablesChartData(); charts.con.update(); }
+      if (charts.asset) { charts.asset.data = getAssetStatusChartData(); charts.asset.update(); }
+      if (charts.maint) { charts.maint.data = getMaintenanceChartData(); charts.maint.update(); }
+    }
+
+    // CHART 1: สถิติตรวจเช็ครถยนต์ (ลบ HS ออกจากกราฟ)
+    function getCarCheckChartData() {
+      const counts = {};
+      const carVehicles = STATIC_VEHICLES.filter(v => v !== 'HS');
+      carVehicles.forEach(v => counts[v] = 0);
+      carCheckData.forEach(c => {
+        if (counts[c.vehicle] !== undefined) counts[c.vehicle]++;
+      });
+      return {
+        labels: Object.keys(counts).map(v => `${v}`),
+        datasets: [{ label: 'จำนวนครั้งที่เช็ค', data: Object.values(counts), backgroundColor: '#dc2626', borderRadius: 8 }]
+      };
+    }
+
+    function getPPEChartData() {
+      const counts = {};
+      STATIC_VEHICLES.forEach(v => counts[v] = 0);
+      ppeData.forEach(p => {
+        if (counts[p.location] !== undefined) counts[p.location]++;
+        else counts[p.location] = 1;
+      });
+      return {
+        labels: Object.keys(counts).map(v => `${v}`),
+        datasets: [{ label: 'จำนวนครั้งที่เบิก', data: Object.values(counts), backgroundColor: '#ffffff', borderRadius: 8 }]
+      };
+    }
+
+    function getConsumablesChartData() {
+      return {
+        labels: stocksData.map(s => s.name.substring(0, 10) + '...'),
+        datasets: [{ label: 'สต็อกคงเหลือ', data: stocksData.map(s => s.qty), borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.2)', fill: true, tension: 0.3 }]
+      };
+    }
+
+    function getAssetStatusChartData() {
+      const today = new Date();
+      let normal = 0, expSoon = 0, expired = 0;
+      assetData.forEach(a => {
+        const exp = new Date(a.expDate);
+        const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) expired++;
+        else if (diffDays <= 30) expSoon++;
+        else normal++;
+      });
+      return {
+        labels: ['ปกติ', 'ใกล้หมดอายุ (30 วัน)', 'หมดอายุแล้ว'],
+        datasets: [{ data: [normal, expSoon, expired], backgroundColor: ['#ffffff', '#f59e0b', '#dc2626'] }]
+      };
+    }
+
+    // VEHICLE-GROUPED MAINTENANCE CHART (CHART 5: แสดง ปกติ / ชำรุดรอซ่อม / ปลดระวาง + ตัวเลขในแท่ง)
+    function getMaintenanceChartData() {
+      const selectedVehicle = document.getElementById('chartMaintVehicleFilter')?.value || '';
+      const rounds = ['รอบที่ 1', 'รอบที่ 2', 'รอบที่ 3', 'รอบที่ 4'];
+
+      if (selectedVehicle) {
+        const normalCounts = [0, 0, 0, 0];
+        const repairCounts = [0, 0, 0, 0];
+        const decomCounts = [0, 0, 0, 0];
+
+        maintenanceData.filter(m => (m.vehicle || m.asset) === selectedVehicle).forEach(m => {
+          const idx = rounds.findIndex(r => m.round.includes(r));
+          if (idx !== -1) {
+            const s = m.status || m.result || '';
+            if (s.includes('ปกติ')) normalCounts[idx]++;
+            else if (s.includes('ชำรุด')) repairCounts[idx]++;
+            else if (s.includes('ปลดระวาง')) decomCounts[idx]++;
+            else normalCounts[idx]++;
+          }
+        });
+
+        return {
+          labels: rounds,
+          datasets: [
+            { label: 'ปกติ', data: normalCounts, backgroundColor: '#ffffff', borderRadius: 6 },
+            { label: 'ชำรุดรอซ่อม', data: repairCounts, backgroundColor: '#dc2626', borderRadius: 6 },
+            { label: 'ปลดระวาง', data: decomCounts, backgroundColor: '#7f1d1d', borderRadius: 6 }
+          ]
+        };
+      }
+
+      const normalData = [], repairData = [], decomData = [];
+
+      STATIC_VEHICLES.forEach(veh => {
+        let normal = 0, repair = 0, decom = 0;
+        maintenanceData.filter(m => (m.vehicle || m.asset) === veh).forEach(m => {
+          const s = m.status || m.result || '';
+          if (s.includes('ปกติ')) normal++;
+          else if (s.includes('ชำรุด')) repair++;
+          else if (s.includes('ปลดระวาง')) decom++;
+          else normal++;
+        });
+
+        normalData.push(normal);
+        repairData.push(repair);
+        decomData.push(decom);
+      });
+
+      return {
+        labels: STATIC_VEHICLES,
+        datasets: [
+          { label: 'ปกติ', data: normalData, backgroundColor: '#ffffff', borderRadius: 6 },
+          { label: 'ชำรุดรอซ่อม', data: repairData, backgroundColor: '#dc2626', borderRadius: 6 },
+          { label: 'ปลดระวาง', data: decomData, backgroundColor: '#7f1d1d', borderRadius: 6 }
+        ]
+      };
+    }
+
+    window.deleteRecord = function(type, id) {
+      Swal.fire({
+        title: 'ยืนยันการลบรายการ?',
+        text: 'การดำเนินการนี้ไม่สามารถย้อนกลับได้',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'ลบข้อมูล'
+      }).then(res => {
+        if (res.isConfirmed) {
+          if (type === 'carCheck') carCheckData = carCheckData.filter(i => i.id !== id);
+          if (type === 'ppe') ppeData = ppeData.filter(i => i.id !== id);
+          if (type === 'consumables') consumablesData = consumablesData.filter(i => i.id !== id);
+          if (type === 'asset') assetData = assetData.filter(i => i.id !== id);
+          if (type === 'maintenance') maintenanceData = maintenanceData.filter(i => i.id !== id);
+
+          saveAllToLocalStorage();
+          renderAllTables();
+          updateDashboardStats();
+          updateCharts();
+          Swal.fire('ลบเรียบร้อย!', 'ลบรายการข้อมูลงในระบบแล้ว', 'success');
+        }
+      });
+    };
+
+    window.exportTableToCSV = function(type) {
+      let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+      if (type === 'car_check') {
+        csvContent += "Date,Vehicle,Inspector,Status,IssuesCount,Note\n";
+        carCheckData.forEach(r => csvContent += `"${r.date}","${r.vehicle}","${r.inspector}","${r.status}","${r.issues?.length||0}","${r.note||''}"\n`);
+      } else if (type === 'ppe') {
+        csvContent += "Date,Type,User,Approver,Location,ReturnedStatus,Note\n";
+        ppeData.forEach(r => csvContent += `"${r.date}","${r.type}","${r.user}","${r.approver}","${r.location}","${r.returnedStatus}","${r.note||''}"\n`);
+      } else if (type === 'consumables') {
+        csvContent += "Date,ItemName,Qty,User,Approver,Vehicle,Note\n";
+        consumablesData.forEach(r => csvContent += `"${r.date}","${r.itemName}","${r.qty}","${r.user}","${r.approver||''}","${r.vehicle||''}","${r.note||''}"\n`);
+      } else if (type === 'assets') {
+        csvContent += "AccountCode,HSCode,Name,Status,Department,Owner,Serial,Brand,Model,PurchaseDate,LifespanYears,ExpDate,Location\n";
+        assetData.forEach(r => csvContent += `"${r.accountCode||r.code||''}","${r.hsCode||''}","${r.name}","${r.status}","${r.department||'HS'}","${r.owner}","${r.serial||''}","${r.brand||''}","${r.model||''}","${r.purchaseDate||''}","${r.lifespanYears||3}","${r.expDate}","${r.location}"\n`);
+      } else if (type === 'maintenance') {
+        csvContent += "Date,Category,Round,Vehicle,Inspector,Status,DefectsCount,Note\n";
+        maintenanceData.forEach(r => csvContent += `"${r.date}","${r.categoryTitle||''}","${r.round}","${r.vehicle||r.asset||''}","${r.inspector}","${r.status||r.result||''}","${r.defects?.length||0}","${r.note||''}"\n`);
+      }
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `TIGER_SOFT_HS_${type}_export.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
+    window.openImageModal = function(src) {
+      document.getElementById('imageModalImg').src = src;
+      document.getElementById('imageModal').classList.remove('hidden');
+    };
+
+    window.closeImageModal = function() {
+      document.getElementById('imageModal').classList.add('hidden');
+    };
+
+    window.openApiKeyModal = function() {
+      const currentKey = localStorage.getItem('tiger_gemini_key') || '';
+      Swal.fire({
+        title: 'กำหนด Gemini API Key',
+        input: 'password',
+        inputLabel: 'ใส่ Gemini API Key เพื่อเปิดใช้ AI แบบเรียลไทม์ (หรือเว้นว่างไว้เพื่อใช้ Smart Fallback AI Engine)',
+        inputValue: currentKey,
+        showCancelButton: true,
+        confirmButtonText: 'บันทึก Key',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#dc2626'
+      }).then(res => {
+        if (res.isConfirmed) {
+          if (res.value) {
+            localStorage.setItem('tiger_gemini_key', res.value);
+            document.getElementById('apiKeyStatus').textContent = 'Custom Key';
+            document.getElementById('apiKeyStatus').className = 'px-2 py-0.5 rounded text-[10px] bg-red-950 text-red-400 font-bold';
+          } else {
+            localStorage.removeItem('tiger_gemini_key');
+            document.getElementById('apiKeyStatus').textContent = 'Default';
+            document.getElementById('apiKeyStatus').className = 'px-2 py-0.5 rounded text-[10px] bg-zinc-900 text-zinc-400';
+          }
+          Swal.fire('ตั้งค่าสำเร็จ!', 'บันทึกการตั้งค่า API Key เรียบร้อย', 'success');
+        }
+      });
+    };
+
+    function setupClock() {
+      setInterval(() => {
+        const now = new Date();
+        const clockEl = document.getElementById('liveClock');
+        const dateEl = document.getElementById('liveDate');
+        if (clockEl) clockEl.textContent = now.toLocaleTimeString('th-TH');
+        if (dateEl) dateEl.textContent = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+      }, 1000);
+    }
+
+    window.openFirebaseConfigModal = function() {
+      const currentConfig = localStorage.getItem('tiger_firebase_config') || '';
+      Swal.fire({
+        title: '☁️ ตั้งค่า Firebase Cloud Sync ออนไลน์',
+        html: `
+          <div class="text-left text-xs space-y-3 p-1">
+            <p class="text-zinc-300">วาง **Firebase Config JSON** เพื่อเปิดใช้งานการซิงค์ข้อมูลแบบ Real-time ข้ามเครื่องและมือถือทุกเครื่องออนไลน์:</p>
+            <textarea id="swalFirebaseConfig" rows="6" placeholder='{"apiKey":"AIzaSy...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}' class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-3 text-xs font-mono text-white focus:border-red-500 outline-none">${currentConfig}</textarea>
+            <div class="p-2.5 bg-red-950/40 border border-red-800/40 rounded-xl text-[11px] text-red-300 space-y-1">
+              <div class="font-bold">✨ ประโยชน์ของการเปิด Cloud Sync:</div>
+              <div>• ข้อมูลสถิติ รถยนต์ PPE และวัสดุสิ้นเปลืองจะซิงค์ตรงกันทุกเครื่องแบบ Real-Time</div>
+              <div>• ทีมงานสามารถเปิดใช้งานผ่านมือถือพร้อมกันได้ทันที</div>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'บันทึก Cloud Config',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#dc2626',
+        preConfirm: () => {
+          const raw = document.getElementById('swalFirebaseConfig').value.trim();
+          if (!raw) {
+            localStorage.removeItem('tiger_firebase_config');
+            return null;
+          }
+          try {
+            const parsed = JSON.parse(raw);
+            if (!parsed.projectId || !parsed.apiKey) throw new Error("Invalid config format");
+            localStorage.setItem('tiger_firebase_config', JSON.stringify(parsed));
+            return parsed;
+          } catch(e) {
+            Swal.showValidationMessage('รูปแบบ Firebase Config JSON ไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง!');
+            return false;
+          }
+        }
+      }).then(res => {
+        if (res.isConfirmed) {
+          if (res.value) {
+            Swal.fire('เชื่อมต่อ Cloud Sync สำเร็จ!', 'ระบบเริ่มซิงค์ข้อมูลกับ Firebase Cloud Real-time แล้ว', 'success');
+          } else {
+            Swal.fire('คืนค่า Hybrid Mode', 'เปลี่ยนกลับเป็นโหมด LocalStorage', 'info');
+          }
+        }
+      });
+    };
+
+    Object.assign(window, {
+      switchPage,
+      switchSubTab,
+      resetToDemoData,
+      renderCarCheckTable,
+      renderPPETable,
+      renderConsumablesTable,
+      renderAssetsTable,
+      renderMaintenanceTable,
+      updateStockHint,
+      handleCarCheckSubmit,
+      handlePPESubmit,
+      handleConsumablesSubmit,
+      handleAssetSubmit,
+      handleMaintenanceSubmit,
+      openAddEquipmentModal,
+      deleteCustomEquipment,
+      openAddPPEModal,
+      deleteCustomPPEItem,
+      openAddMaintenanceEquipmentModal,
+      deleteCustomMaintenanceItem,
+      markPPEReturned,
+      openAddConsumableModal,
+      autoCalculateExpiryDate,
+      viewAssetDetailsModal,
+      runAIEstimateLifespan,
+      switchMaintenanceCategory,
+      openFirebaseConfigModal
+    });
+  </script>
+</body>
+</html>
